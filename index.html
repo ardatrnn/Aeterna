@@ -3,596 +3,975 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AETERNA: IMPERIUM | GRAND STRATEGY</title>
+    <title>AETERNA: STATECRAFT | GRAND STRATEGY ENGINE v4.0</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="manifest" href="https://ardatrnn.github.io/Aeterna/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Teko:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --gold: #d4af37;
-            --gold-muted: #8a732d;
-            --bg-deep: #08080c;
-            --bg-panel: #0d0e12;
-            --border: #1f2128;
-            --neon-blue: #00d2ff;
-            --neon-red: #ff3e3e;
-            --neon-green: #39ff14;
-            --text-main: #e0e0e0;
-            --text-dim: #888;
+            --bg-dark: #020202;
+            --bg-panel: #0b0d12;
+            --bg-header: #111;
+            
+            --cyber-blue: #00f3ff;
+            --cyber-gold: #ffd700;
+            --cyber-red: #ff2a2a;
+            --cyber-green: #0aff0a;
+            --cyber-purple: #bc13fe;
+            
+            --border: 1px solid rgba(255, 255, 255, 0.08);
+            --glass: rgba(11, 13, 18, 0.95);
+            
+            --font-head: 'Teko', sans-serif;
+            --font-ui: 'Rajdhani', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        * { box-sizing: border-box; user-select: none; outline: none; }
+        
         body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            font-size: 14px;
+            background-color: var(--bg-dark);
+            color: #e0e0e0;
+            font-family: var(--font-ui);
+            margin: 0; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            background-image: radial-gradient(circle at 50% 50%, #051020 0%, #000 100%);
         }
 
-        /* --- TOP NAVIGATION & HUD --- */
-        #hud-top {
-            height: 50px;
-            background: #000;
-            border-bottom: 1px solid var(--gold-muted);
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            gap: 15px;
-            z-index: 1000;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        #hud-top::-webkit-scrollbar { display: none; }
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--cyber-blue); }
 
-        .hud-item {
-            display: flex;
-            flex-direction: column;
-            min-width: 80px;
+        /* --- TOP BAR --- */
+        #top-hud {
+            height: 60px; background: var(--bg-header); border-bottom: 1px solid #333;
+            display: flex; align-items: center; padding: 0 20px; gap: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 100;
         }
-        .hud-label { font-size: 0.6rem; color: var(--gold); font-weight: bold; text-transform: uppercase; }
-        .hud-value { font-size: 0.85rem; font-weight: 700; font-family: 'Fira Code', monospace; }
-
-        /* --- MAIN INTERFACE --- */
-        #game-container {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 320px 1fr 320px;
-            gap: 1px;
-            background: var(--border);
-            overflow: hidden;
+        
+        .hud-group { display: flex; gap: 15px; border-right: 1px solid #333; padding-right: 15px; height: 40px; align-items: center; }
+        .metric-box { display: flex; flex-direction: column; min-width: 60px; }
+        .metric-val { font-family: var(--font-mono); font-weight: bold; color: #fff; font-size: 14px; }
+        .metric-lbl { font-size: 10px; color: #666; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .game-clock { font-family: var(--font-mono); font-size: 16px; color: var(--cyber-gold); text-align: right; margin-left: auto; }
+        .defcon-box { 
+            font-family: var(--font-head); font-size: 24px; padding: 0 15px; 
+            border: 2px solid var(--cyber-red); color: var(--cyber-red);
+            text-shadow: 0 0 10px var(--cyber-red); cursor: pointer;
+            animation: pulse-slow 3s infinite;
         }
 
-        @media (max-width: 1100px) {
-            #game-container { grid-template-columns: 1fr; }
-            .side-panel { display: none; }
-            #mobile-nav { display: flex; }
-        }
-
-        .side-panel {
-            background: var(--bg-deep);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
-
-        /* --- TABS --- */
-        .tab-content { display: none; padding: 15px; flex: 1; overflow-y: auto; }
-        .tab-content.active { display: block; }
-
-        .panel-header {
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid var(--border);
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* --- MAP AREA --- */
+        /* --- MAIN LAYOUT --- */
         #viewport {
-            position: relative;
-            background: radial-gradient(circle at center, #1a1c24 0%, #08080c 100%);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        #map-canvas { width: 100%; height: 100%; cursor: crosshair; }
-
-        /* --- BUTTONS & ACTIONS --- */
-        .action-card {
-            background: var(--bg-panel);
-            border: 1px solid var(--border);
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            transition: 0.3s;
-        }
-        .action-card:hover { border-color: var(--gold-muted); }
-        .btn-action {
-            width: 100%;
-            padding: 8px;
-            background: transparent;
-            border: 1px solid var(--gold-muted);
-            color: var(--gold);
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
-            text-transform: uppercase;
-        }
-        .btn-action:hover { background: var(--gold); color: #000; }
-        .btn-action:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        /* --- STOCK MARKET & INDUSTRY --- */
-        .market-row {
-            display: flex; justify-content: space-between;
-            padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.8rem;
-        }
-        .trend-up { color: var(--neon-green); }
-        .trend-down { color: var(--neon-red); }
-
-        /* --- PROGRESS BARS --- */
-        .progress-container { height: 6px; background: #222; border-radius: 3px; margin: 8px 0; overflow: hidden; }
-        .progress-fill { height: 100%; width: 50%; background: var(--gold); transition: 0.5s; }
-
-        /* --- LOGS --- */
-        #terminal-log {
-            height: 150px;
-            background: #000;
-            border-top: 2px solid var(--gold-muted);
-            padding: 10px;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.7rem;
-            color: #55ff55;
-            overflow-y: auto;
+            flex: 1; display: grid; 
+            grid-template-columns: 350px 1fr 380px;
+            overflow: hidden; gap: 1px; background: #222;
         }
 
-        /* --- NOTIFICATIONS --- */
-        #toast-container { position: fixed; bottom: 170px; right: 20px; z-index: 9999; }
-        .toast { background: var(--gold); color: #000; padding: 10px 20px; border-radius: 4px; margin-top: 10px; font-weight: bold; animation: slideIn 0.3s; }
-
-        /* --- MODAL --- */
-        #modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            display: none; align-items: center; justify-content: center; z-index: 10000;
+        .panel { background: var(--bg-panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        /* TABS */
+        .nav-tabs { display: flex; background: #080808; height: 40px; border-bottom: var(--border); }
+        .nav-btn {
+            flex: 1; background: transparent; border: none; color: #666;
+            font-family: var(--font-head); font-size: 18px; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent;
         }
-        .modal {
-            width: 90%; max-width: 500px; background: var(--bg-panel);
-            border: 2px solid var(--gold); padding: 25px; border-radius: 8px;
+        .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-btn.active { color: var(--cyber-blue); border-bottom-color: var(--cyber-blue); background: rgba(0, 243, 255, 0.05); }
+
+        .content-area { padding: 15px; overflow-y: auto; flex: 1; display: none; }
+        .content-area.active { display: block; animation: fadeIn 0.3s; }
+
+        /* WIDGETS */
+        .card { 
+            background: rgba(255,255,255,0.02); border: 1px solid #222; 
+            padding: 12px; margin-bottom: 10px; border-radius: 4px; 
+        }
+        .card-head { 
+            font-size: 12px; font-weight: bold; color: var(--cyber-gold); 
+            margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 4px;
         }
 
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .row-kv { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; font-family: var(--font-mono); }
+        .bar-cont { height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin: 4px 0 8px 0; }
+        .bar-fill { height: 100%; transition: width 0.5s; }
 
-        /* --- CHART STYLING --- */
-        .chart-box { height: 180px; margin-bottom: 15px; }
-
-        /* --- MOBILE NAV --- */
-        #mobile-nav {
-            display: none;
-            height: 60px;
-            background: #000;
-            border-top: 1px solid var(--gold-muted);
-            justify-content: space-around;
-            align-items: center;
+        /* BUTTONS */
+        .btn-main {
+            width: 100%; padding: 10px; background: linear-gradient(90deg, #111, #181818);
+            border: 1px solid #333; color: #ccc; text-align: left;
+            font-family: var(--font-ui); font-size: 14px; cursor: pointer;
+            margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;
         }
-        .m-nav-btn { color: var(--gold); font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; }
+        .btn-main:hover { border-color: var(--cyber-blue); color: #fff; padding-left: 15px; }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; border-color: #222; }
+        .cost-tag { font-size: 11px; font-family: var(--font-mono); color: #666; }
 
+        /* MAP AREA */
+        #map-wrapper { position: relative; background: #000; overflow: hidden; }
+        #map-canvas { display: block; width: 100%; height: 100%; }
+        
+        #map-ui { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .map-mode { 
+            background: rgba(0,0,0,0.8); color: #aaa; border: 1px solid #444; padding: 6px 12px; 
+            font-size: 11px; cursor: pointer; backdrop-filter: blur(4px); font-weight: bold;
+        }
+        .map-mode.active { border-color: var(--cyber-blue); color: var(--cyber-blue); box-shadow: 0 0 10px rgba(0,243,255,0.2); }
+
+        #province-detail {
+            position: absolute; bottom: 20px; right: 20px; width: 300px;
+            background: rgba(10, 12, 16, 0.95); border: 1px solid var(--cyber-blue);
+            padding: 15px; backdrop-filter: blur(10px); display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+
+        /* CABINET FACES */
+        .cabinet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .minister-card { 
+            border: 1px solid #333; padding: 5px; text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .minister-card:hover { border-color: var(--cyber-gold); background: rgba(255,215,0,0.05); }
+        .min-role { font-size: 10px; color: #888; text-transform: uppercase; }
+        .min-name { font-size: 13px; font-weight: bold; color: #fff; }
+        .min-stat { font-size: 10px; color: var(--cyber-green); }
+
+        /* TICKER */
+        #news-ticker {
+            height: 25px; background: var(--cyber-gold); color: #000;
+            display: flex; align-items: center; overflow: hidden; white-space: nowrap;
+            font-family: var(--font-mono); font-weight: bold; font-size: 12px;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 200;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000;
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        .modal-window {
+            width: 700px; max-height: 80vh; background: #111; border: 1px solid #444;
+            display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .mw-header { background: #1a1a1a; padding: 15px; font-family: var(--font-head); font-size: 22px; color: #fff; border-bottom: 1px solid #333; }
+        .mw-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; }
+        .mw-footer { padding: 15px; border-top: 1px solid #333; display: flex; justify-content: flex-end; gap: 10px; }
+
+        /* ANIMATIONS */
+        @keyframes pulse-slow { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .trend-up { color: var(--cyber-green); }
+        .trend-down { color: var(--cyber-red); }
     </style>
 </head>
 <body>
 
-<div id="hud-top">
-    <div class="hud-item"><span class="hud-label">Hazine</span><span class="hud-value" id="val-money">$0</span></div>
-    <div class="hud-item"><span class="hud-label">Döviz</span><span class="hud-value" id="val-fx">1.00</span></div>
-    <div class="hud-item"><span class="hud-label">Enflasyon</span><span class="hud-value trend-down" id="val-inf">2.0%</span></div>
-    <div class="hud-item"><span class="hud-label">İstikrar</span><span class="hud-value" id="val-stb">90%</span></div>
-    <div class="hud-item"><span class="hud-label">Askeri</span><span class="hud-value" id="val-mil">0/100</span></div>
-    <div class="hud-item" style="margin-left:auto;"><span class="hud-label">Tarih</span><span class="hud-value" id="val-date">1 OCAK 1936</span></div>
+<!-- TOP HUD -->
+<div id="top-hud">
+    <div style="font-family: var(--font-head); font-size: 28px; color: #fff; letter-spacing: 2px;">
+        AETERNA <span style="color:var(--cyber-blue)">OMEGA</span>
+    </div>
+
+    <div class="hud-group">
+        <div class="metric-box">
+            <span class="metric-val" id="hud-money">$0M</span>
+            <span class="metric-lbl">HAZİNE</span>
+        </div>
+        <div class="metric-box">
+            <span class="metric-val" id="hud-gdp" style="color:var(--cyber-green)">$0B</span>
+            <span class="metric-lbl">GSYİH (GDP)</span>
+        </div>
+    </div>
+
+    <div class="hud-group">
+        <div class="metric-box">
+            <span class="metric-val" id="hud-inf">0%</span>
+            <span class="metric-lbl">ENFLASYON</span>
+        </div>
+        <div class="metric-box">
+            <span class="metric-val" id="hud-stab">0%</span>
+            <span class="metric-lbl">İSTİKRAR</span>
+        </div>
+    </div>
+
+    <div class="hud-group">
+        <div class="metric-box">
+            <span class="metric-val" id="hud-pp" style="color:var(--cyber-gold)">0</span>
+            <span class="metric-lbl">POLİTİK GÜÇ</span>
+        </div>
+        <div class="metric-box">
+            <span class="metric-val" id="hud-intel" style="color:var(--cyber-purple)">0</span>
+            <span class="metric-lbl">İSTİHBARAT</span>
+        </div>
+    </div>
+
+    <div class="defcon-box" onclick="game.toggleDefcon()">DEFCON 5</div>
+
+    <div class="game-clock">
+        <div id="date-display">01 OCAK 2025</div>
+        <div style="font-size:10px; color:#666; cursor:pointer;" onclick="game.togglePause()">[ SPACE: DURDUR/BAŞLAT ]</div>
+    </div>
 </div>
 
-<div id="game-container">
-    <!-- SOL: EKONOMİ VE SANAYİ -->
-    <aside class="side-panel">
-        <div class="panel-header">EKONOMİ VE BORSALAR</div>
-        <div class="tab-content active">
-            <div class="chart-box"><canvas id="mainChart"></canvas></div>
-            
-            <div class="action-card">
-                <div style="font-size: 0.75rem; margin-bottom: 8px;">Merkez Bankası Faizi: <span id="val-rate">5.0%</span></div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
-                    <button class="btn-action" onclick="game.adjustRate(0.25)">Faiz Artır</button>
-                    <button class="btn-action" onclick="game.adjustRate(-0.25)">Faiz Düşür</button>
+<!-- MAIN VIEWPORT -->
+<div id="viewport">
+    
+    <!-- LEFT PANEL: STATECRAFT -->
+    <div class="panel">
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="ui.tab('l', 'gov')">HÜKÜMET</button>
+            <button class="nav-btn" onclick="ui.tab('l', 'eco')">EKONOMİ</button>
+            <button class="nav-btn" onclick="ui.tab('l', 'res')">AR-GE</button>
+        </div>
+
+        <!-- GOVERNMENT TAB -->
+        <div id="tab-l-gov" class="content-area active">
+            <div class="card">
+                <div class="card-head">BAKANLAR KURULU (KABİNE)</div>
+                <div class="cabinet-grid" id="cabinet-container">
+                    <!-- JS Generated -->
                 </div>
             </div>
 
-            <div class="action-card">
-                <div class="hud-label">Borsa İstanbul (BIST)</div>
-                <div id="stock-list">
-                    <!-- Stocks dynamic -->
+            <div class="card">
+                <div class="card-head">MECLİS DAĞILIMI</div>
+                <canvas id="parliament-chart" height="150"></canvas>
+                <div style="margin-top:10px; font-size:11px; text-align:center; color:#888;">
+                    Bir sonraki seçim: <span id="election-timer" style="color:#fff">1460</span> gün
                 </div>
             </div>
 
-            <div class="action-card">
-                <div class="hud-label">Sanayi Kapasitesi</div>
-                <div class="progress-container"><div class="progress-fill" id="bar-ind"></div></div>
-                <div style="font-size: 0.7rem; display: flex; justify-content: space-between;">
-                    <span>Sivil Sanayi</span> <span id="val-civ">0</span>
-                </div>
-                <div style="font-size: 0.7rem; display: flex; justify-content: space-between;">
-                    <span>Askeri Sanayi</span> <span id="val-mil-fact">0</span>
-                </div>
-                <button class="btn-action" onclick="game.build('civ')">Sivil Fabrika İnşa Et ($250k)</button>
-                <button class="btn-action" onclick="game.build('mil')">Askeri Fabrika İnşa Et ($400k)</button>
+            <div class="card">
+                <div class="card-head">YASAMA FAALİYETLERİ</div>
+                <button class="btn-main" onclick="game.passLaw('censorship')">
+                    <span>Sansür Yasası</span> <span class="cost-tag">100 PP</span>
+                </button>
+                <button class="btn-main" onclick="game.passLaw('ohal')">
+                    <span style="color:var(--cyber-red)">OHAL İlanı</span> <span class="cost-tag">250 PP</span>
+                </button>
+                <button class="btn-main" onclick="game.passLaw('conscription')">
+                    <span>Zorunlu Askerlik (Genişletilmiş)</span> <span class="cost-tag">150 PP</span>
+                </button>
             </div>
         </div>
-    </aside>
 
-    <!-- ORTA: HARİTA VE STRATEJİ -->
-    <main id="viewport">
-        <div class="panel-header">STRATEJİK OPERASYON MERKEZİ <span id="map-mode">SİYASİ HARİTA</span></div>
+        <!-- ECONOMY TAB -->
+        <div id="tab-l-eco" class="content-area">
+            <div class="card">
+                <div class="card-head">MAKROEKONOMİK GÖSTERGELER</div>
+                <div class="row-kv"><span>Büyüme Oranı:</span> <span id="eco-growth" class="trend-up">+3.2%</span></div>
+                <div class="row-kv"><span>İşsizlik:</span> <span id="eco-unemp">10.5%</span></div>
+                <div class="row-kv"><span>Faiz (Merkez Bankası):</span> <span id="eco-interest">15.0%</span></div>
+                <div class="row-kv"><span>Dış Borç:</span> <span id="eco-debt" style="color:var(--cyber-red)">$450B</span></div>
+                <div class="row-kv"><span>Borç/GSYİH:</span> <span id="eco-debt-ratio">45%</span></div>
+                <div class="bar-cont"><div class="bar-fill" id="fill-debt" style="width:45%; background:var(--cyber-red)"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">MALİYE POLİTİKASI</div>
+                <div class="row-kv"><span>Vergi Oranı: %<span id="tax-val">20</span></span></div>
+                <input type="range" min="5" max="60" value="20" style="width:100%" oninput="game.setTax(this.value)">
+                
+                <div style="margin-top:10px;"></div>
+                <button class="btn-main" onclick="game.ecoAction('imf')">
+                    <span>IMF Kredisi Al ($10B)</span> <span class="cost-tag">+Borç / -Bağımsızlık</span>
+                </button>
+                <button class="btn-main" onclick="game.ecoAction('invest_infra')">
+                    <span>Altyapı Yatırımı ($500M)</span> <span class="cost-tag">+Büyüme</span>
+                </button>
+            </div>
+
+            <div class="card">
+                <div class="card-head">KÜRESEL EMTİA BORSASI</div>
+                <div id="market-list"></div>
+            </div>
+        </div>
+
+        <!-- RESEARCH TAB -->
+        <div id="tab-l-res" class="content-area">
+            <div class="card">
+                <div class="card-head">BİLİM VE TEKNOLOJİ</div>
+                <div style="text-align:center; padding:10px;">
+                    <div style="font-size:2em; color:var(--cyber-blue)" id="tech-points">0.0</div>
+                    <div style="font-size:10px; color:#888;">ARAŞTIRMA PUANI</div>
+                </div>
+                <div id="tech-tree-container">
+                    <!-- Generated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CENTER PANEL: WAR ROOM -->
+    <div class="panel" id="map-wrapper">
         <canvas id="map-canvas"></canvas>
         
-        <div style="position:absolute; top:60px; right:15px; display:flex; flex-direction:column; gap:8px;">
-            <button class="btn-action" style="background:rgba(0,0,0,0.7)" onclick="game.setMapMode('pol')">Siyasi</button>
-            <button class="btn-action" style="background:rgba(0,0,0,0.7)" onclick="game.setMapMode('eco')">Ekonomik</button>
-            <button class="btn-action" style="background:rgba(0,0,0,0.7)" onclick="game.setMapMode('mil')">Askeri</button>
+        <div id="map-ui">
+            <button class="map-mode active" onclick="map.setMode('pol')">SİYASİ</button>
+            <button class="map-mode" onclick="map.setMode('terror')">RİSK ANALİZİ</button>
+            <button class="map-mode" onclick="map.setMode('eco')">EKONOMİK</button>
+            <button class="map-mode" onclick="map.setMode('fog')">İSTİHBARAT AĞI</button>
         </div>
 
-        <div id="terminal-log">
-            <div>> AETERNA SİSTEMİ ÇEVRİMİÇİ...</div>
-            <div>> TÜM PARAMETRELER YÜKLENİYOR...</div>
-        </div>
-    </main>
-
-    <!-- SAĞ: SİYASET VE İSTİHBARAT -->
-    <aside class="side-panel">
-        <div class="panel-header">DEVLET YÖNETİMİ</div>
-        <div class="tab-content active">
-            <div class="action-card">
-                <div class="hud-label">Politik Kararlar</div>
-                <button class="btn-action" onclick="game.enact('tax_hike')">Vergi Oranlarını Artır</button>
-                <button class="btn-action" onclick="game.enact('welfare')">Halk Yardımlarını Artır</button>
-                <button class="btn-action" onclick="game.enact('propaganda')">Devlet Propagandası Başlat</button>
-            </div>
-
-            <div class="action-card">
-                <div class="hud-label">İstihbarat Teşkilatı</div>
-                <div style="font-size: 0.7rem; margin-bottom: 5px;">Ajan Sayısı: <span id="val-spies">3</span></div>
-                <button class="btn-action" onclick="game.intel('counter')">Karşı İstihbarat</button>
-                <button class="btn-action" onclick="game.intel('sabotage')">Yabancı Sanayi Sabotajı</button>
-            </div>
-
-            <div class="action-card" id="mil-panel">
-                <div class="hud-label">Ordu Komutanlığı</div>
-                <div class="stat-row">Piyade Tümeni: <span id="val-infantry">0</span></div>
-                <div class="stat-row">Zırhlı Birlikler: <span id="val-tanks">0</span></div>
-                <button class="btn-action" onclick="game.train('infantry')">Tümen Eğit ($100k, 10 Çelik)</button>
+        <div id="province-detail">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px;">
+                <span id="pd-name" style="font-family:var(--font-head); font-size:24px; color:var(--cyber-blue)">BÖLGE ADI</span>
+                <span id="pd-owner" style="font-size:10px; background:#333; padding:2px 5px;">KONTROL: BİZ</span>
             </div>
             
-            <div class="action-card" style="background: rgba(255, 62, 62, 0.1);">
-                <div class="hud-label" style="color: var(--neon-red);">KRİZ MASASI</div>
-                <div id="crisis-alert" style="font-size: 0.7rem; color: #ff9999;">Sistem Stabil.</div>
+            <div class="row-kv"><span>Nüfus:</span> <span id="pd-pop">0M</span></div>
+            <div class="row-kv"><span>Halk Desteği:</span> <span id="pd-loyalty">0%</span></div>
+            <div class="row-kv"><span>Terör Riski:</span> <span id="pd-risk" style="color:var(--cyber-red)">0%</span></div>
+            
+            <div style="margin-top:5px; font-size:10px; color:#888;">GİZLİ HÜCRELER (TAHMİNİ): <span id="pd-cells">???</span></div>
+            <div class="bar-cont"><div class="bar-fill" id="pd-bar-terror" style="width:0%; background:var(--cyber-red)"></div></div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button class="btn-main" style="font-size:11px;" onclick="game.provOp('invest')">YATIRIM YAP<br><span style="color:#888">$50M</span></button>
+                <button class="btn-main" style="font-size:11px;" onclick="game.provOp('intel')">İSTİHBARAT<br><span style="color:#888">20 INTEL</span></button>
+                <button class="btn-main" style="font-size:11px; border-color:var(--cyber-red); color:var(--cyber-red);" onclick="game.provOp('raid')">ÖZEL HAREKAT<br><span style="color:#888">TEHLİKELİ</span></button>
+                <button class="btn-main" style="font-size:11px;" onclick="game.provOp('hearts')">HALK YARDIMI<br><span style="color:#888">$20M + PP</span></button>
             </div>
         </div>
-    </aside>
+    </div>
+
+    <!-- RIGHT PANEL: OPERATIONS -->
+    <div class="panel">
+        <div class="nav-tabs">
+            <button class="nav-btn active" onclick="ui.tab('r', 'mil')">ASKERİ</button>
+            <button class="nav-btn" onclick="ui.tab('r', 'intel')">İSTİHBARAT</button>
+            <button class="nav-btn" onclick="ui.tab('r', 'prod')">ÜRETİM</button>
+        </div>
+
+        <!-- MILITARY -->
+        <div id="tab-r-mil" class="content-area active">
+            <div class="card">
+                <div class="card-head">GENELKURMAY BAŞKANLIĞI</div>
+                <div class="row-kv"><span>Seferberlik Gücü:</span> <span id="mil-manpower">850k</span></div>
+                <div class="row-kv"><span>Savaş Yorgunluğu:</span> <span id="mil-fatigue">0%</span></div>
+                <div class="row-kv"><span>Doktrin:</span> <span style="color:var(--cyber-gold)">HAVA DESTEKLİ KARA HARBİ</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">ORDU ENVANTERİ</div>
+                <div class="row-kv"><i class="fa-solid fa-person-rifle"></i> <span>Piyade Tümeni</span> <span id="cnt-inf">0</span></div>
+                <div class="row-kv"><i class="fa-solid fa-tank"></i> <span>Zırhlı Tugay</span> <span id="cnt-tank">0</span></div>
+                <div class="row-kv"><i class="fa-solid fa-jet-fighter"></i> <span>Jet Filosu</span> <span id="cnt-jet">0</span></div>
+                <div class="row-kv"><i class="fa-solid fa-robot"></i> <span>SİHA Sürüsü</span> <span id="cnt-drone">0</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-head">BİRLİK ALIMI</div>
+                <button class="btn-main" onclick="game.recruit('infantry')">
+                    <span>Piyade Tümeni Kur</span> <span class="cost-tag">1000 Tüfek</span>
+                </button>
+                <button class="btn-main" onclick="game.recruit('tank')">
+                    <span>Zırhlı Birlik Kur</span> <span class="cost-tag">50 Tank</span>
+                </button>
+                <button class="btn-main" onclick="game.recruit('specops')">
+                    <span>Bordo Bereliler</span> <span class="cost-tag">Yüksek Eğitim</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- INTEL -->
+        <div id="tab-r-intel" class="content-area">
+            <div class="card">
+                <div class="card-head">MİT OPERASYONLARI</div>
+                <div style="font-size:12px; margin-bottom:10px; color:#aaa;">
+                    Yabancı ülkelerde darbe planla, terör liderlerine suikast düzenle veya teknoloji çal.
+                </div>
+                <button class="btn-main" onclick="game.intelOp('coup')">
+                    <span>Komşu Ülkede Darbe Planla</span> <span class="cost-tag">500 INTEL</span>
+                </button>
+                <button class="btn-main" onclick="game.intelOp('sabotage')">
+                    <span>Endüstriyel Sabotaj</span> <span class="cost-tag">150 INTEL</span>
+                </button>
+                <button class="btn-main" onclick="game.intelOp('assassinate')">
+                    <span>Lider Suikasti</span> <span class="cost-tag">300 INTEL</span>
+                </button>
+            </div>
+            <div id="intel-logs" style="font-family:var(--font-mono); font-size:10px; height:200px; overflow-y:auto; border:1px solid #333; padding:5px;">
+                <div style="color:var(--cyber-green)">> SİSTEM BAŞLATILDI...</div>
+            </div>
+        </div>
+
+        <!-- PRODUCTION -->
+        <div id="tab-r-prod" class="content-area">
+            <div class="card">
+                <div class="card-head">SANAYİ KOMPLEKSİ</div>
+                <div class="row-kv"><span>Sivil Fabrika:</span> <span id="fac-civ">10</span></div>
+                <div class="row-kv"><span>Askeri Fabrika:</span> <span id="fac-mil">5</span></div>
+                <div class="row-kv"><span>Tersane:</span> <span id="fac-dock">3</span></div>
+                
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                    <button class="btn-main" style="flex:1;" onclick="game.build('civ')">+Sivil ($500M)</button>
+                    <button class="btn-main" style="flex:1;" onclick="game.build('mil')">+Askeri ($800M)</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-head">ÜRETİM HATLARI</div>
+                <div id="production-lines"></div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div id="mobile-nav">
-    <div class="m-nav-btn"><span>EKONOMİ</span></div>
-    <div class="m-nav-btn"><span>HARİTA</span></div>
-    <div class="m-nav-btn"><span>YÖNETİM</span></div>
+<!-- NEWS TICKER -->
+<div id="news-ticker">
+    <div style="animation: scroll-left 40s linear infinite; padding-left: 100%;">
+        ++ SON DAKİKA: KÜRESEL PİYASALARDA BELİRSİZLİK SÜRÜYOR ++ ORTADOĞU'DA YENİ KRİZ KAPIDA ++ ENERJİ FİYATLARI REKOR KIRDI ++ BİRLEŞMİŞ MİLLETLER ACİL TOPLANDI ++
+    </div>
 </div>
 
-<div id="toast-container"></div>
-
-<div id="modal-overlay">
-    <div class="modal">
-        <h2 id="modal-title" style="font-family:'Cinzel'; color:var(--gold); margin:0 0 15px 0;"></h2>
-        <div id="modal-body" style="font-size:0.85rem; line-height:1.6; color:#ccc; margin-bottom:20px;"></div>
-        <div id="modal-footer"></div>
+<!-- MODALS -->
+<div class="modal-overlay" id="event-modal">
+    <div class="modal-window">
+        <div class="mw-header" id="ev-title">OLAY BAŞLIĞI</div>
+        <div class="mw-body" id="ev-body">Olay detayları...</div>
+        <div class="mw-footer" id="ev-actions"></div>
     </div>
 </div>
 
 <script>
-    /**
-     * AETERNA: IMPERIUM - Oyun Motoru
-     * Modern Grand Strategy Mekanikleri
-     */
+/**
+ * AETERNA: OMEGA v4.0 (Statecraft Edition)
+ * The most complex single-file strategy engine.
+ */
 
-    const game = {
-        state: {
-            money: 5000000,
-            fx: 1.00,
-            inflation: 2.0,
-            rate: 5.0,
-            stability: 90,
-            date: new Date(1936, 0, 1),
-            civFactories: 5,
-            milFactories: 2,
-            resources: { steel: 100, oil: 50, power: 80 },
-            military: { infantry: 0, tanks: 0, air: 0 },
-            spies: 3,
-            market: [
-                { id: 'TECH', name: 'Teknoloji Endeksi', price: 100, trend: 0 },
-                { id: 'IND', name: 'Ağır Sanayi', price: 100, trend: 0 },
-                { id: 'AGR', name: 'Tarım & Gıda', price: 100, trend: 0 }
-            ],
-            history: { inf: [2.0], fx: [1.00] }
+/* --- CONSTANTS & DATA --- */
+const DATA = {
+    ministers: [
+        { id: 'def_hawk', role: 'Savunma Bakanı', name: 'Org. H. Akar (E)', buff: 'Ordu Morali +%10', loyal: 90 },
+        { id: 'def_dove', role: 'Savunma Bakanı', name: 'Dr. S. Yılmaz', buff: 'Barış İstencini Artırır', loyal: 60 },
+        { id: 'eco_lib', role: 'Maliye Bakanı', name: 'M. Şimşek', buff: 'Dış Yatırım +%20', loyal: 85 },
+        { id: 'eco_nat', role: 'Maliye Bakanı', name: 'B. Albayrak', buff: 'Milli Sanayi +%15', loyal: 95 },
+        { id: 'int_sec', role: 'İçişleri Bakanı', name: 'A. Yerlikaya', buff: 'Terörle Mücadele +%25', loyal: 90 }
+    ],
+    techs: [
+        {id:'t1', name:'Endüstri 4.0', cost:150}, {id:'t2', name:'Kompozit Zırh', cost:200},
+        {id:'t3', name:'Sürü İHA', cost:350}, {id:'t4', name:'Nükleer Enerji', cost:500},
+        {id:'t5', name:'Kuantum Şifreleme', cost:400}, {id:'t6', name:'Uzay Madenciliği', cost:1000}
+    ]
+};
+
+/* --- CORE ENGINE --- */
+const game = {
+    state: {
+        date: new Date(2025, 0, 1),
+        resources: {
+            money: 15000, // Million $
+            pp: 500,
+            intel: 50,
+            techPoints: 0
         },
-
-        chart: null,
-        loopInterval: null,
-        mapMode: 'pol',
-
-        init() {
-            this.setupChart();
-            this.setupMap();
-            this.renderStocks();
-            this.updateUI();
-            this.startLoop();
-            this.log("Aeterna Imperium Protokolü Aktif. Hoş geldiniz, Başkan.");
+        economy: {
+            gdp: 900, // Billion $
+            growth: 3.5,
+            inflation: 15.0,
+            interest: 20.0,
+            debt: 350, // Billion $
+            taxRate: 20
         },
+        country: {
+            stability: 60,
+            warSupport: 45,
+            defcon: 5,
+            manpower: 1200000
+        },
+        cabinet: {
+            defense: DATA.ministers[0],
+            economy: DATA.ministers[2],
+            interior: DATA.ministers[4]
+        },
+        provinces: [], // Generated
+        army: [],
+        production: [
+            {id:'gun', name:'Piyade Tüfeği', factories:3, progress:0},
+            {id:'tank', name:'Altay Tankı', factories:2, progress:0},
+            {id:'drone', name:'TB-3 SİHA', factories:4, progress:0}
+        ],
+        stockpile: { gun:10000, tank:150, jet:20, drone:40 }
+    },
+    
+    timer: null,
+    paused: false,
+    selectedProvId: null,
 
-        setupChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            this.chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: Array(12).fill(''),
-                    datasets: [
-                        { label: 'Enflasyon', data: this.state.history.inf, borderColor: '#ff3e3e', borderWidth: 2, pointRadius: 0, fill: false },
-                        { label: 'Döviz', data: this.state.history.fx, borderColor: '#39ff14', borderWidth: 2, pointRadius: 0, fill: false }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { 
-                        x: { display: false },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#555', font: { size: 10 } } }
+    init() {
+        console.log("OMEGA v4 KERNEL LOADED.");
+        this.loadGame();
+        
+        if(this.state.provinces.length === 0) this.generateWorld();
+        
+        map.init();
+        ui.init();
+        
+        this.startLoop();
+    },
+
+    generateWorld() {
+        // Procedural Map Generation (Graph Nodes)
+        const nodes = [
+            {n:"İstanbul", x:180, y:150, pop:16, gdp:250}, {n:"Ankara", x:320, y:200, pop:6, gdp:150},
+            {n:"İzmir", x:120, y:300, pop:4.5, gdp:120}, {n:"Antalya", x:250, y:380, pop:2.5, gdp:80},
+            {n:"Diyarbakır", x:500, y:280, pop:2, gdp:40}, {n:"Van", x:580, y:260, pop:1.2, gdp:20},
+            {n:"Trabzon", x:420, y:120, pop:1, gdp:30}, {n:"Erzurum", x:480, y:180, pop:0.8, gdp:25},
+            {n:"Adana", x:350, y:320, pop:2.2, gdp:60}, {n:"Konya", x:280, y:280, pop:2.3, gdp:50},
+            {n:"Musul (Op)", x:520, y:400, pop:1.5, gdp:15, foreign:true}, {n:"Atina (Rakip)", x:50, y:280, pop:3, gdp:200, foreign:true}
+        ];
+
+        this.state.provinces = nodes.map((n, i) => ({
+            id: i,
+            name: n.n,
+            x: n.x, y: n.y,
+            pop: n.pop,
+            gdp: n.gdp,
+            isForeign: n.foreign || false,
+            loyalty: n.foreign ? 0 : 70 + (Math.random()*20),
+            risk: n.foreign ? 80 : 5 + (Math.random()*10),
+            hiddenCells: n.foreign ? 50 : (Math.random() < 0.3 ? 20 : 0), // Hidden Terror Cells
+            intelLevel: 10, // Fog of war (0-100)
+            investments: 0
+        }));
+    },
+
+    startLoop() {
+        if(this.timer) clearInterval(this.timer);
+        this.timer = setInterval(() => this.tick(), 1000); // 1 real sec = 1 game day
+    },
+
+    togglePause() {
+        this.paused = !this.paused;
+        const disp = document.getElementById('date-display');
+        disp.style.color = this.paused ? 'red' : 'var(--cyber-gold)';
+        disp.innerText = this.paused ? "OYUN DURDURULDU" : this.getDateStr();
+    },
+
+    tick() {
+        if(this.paused) return;
+        
+        const s = this.state;
+        s.date.setDate(s.date.getDate() + 1);
+
+        // --- ECONOMY CYCLE (Simplistic but deep) ---
+        // Daily Cost
+        const armyCost = s.army.length * 2;
+        const interestCost = (s.economy.debt * (s.economy.interest/100)) / 365;
+        const income = (s.economy.gdp * (s.economy.taxRate/100)) / 365;
+        
+        s.resources.money += (income - armyCost - interestCost);
+        
+        // Debt Spiral Logic
+        if(s.resources.money < 0) {
+            s.economy.debt += Math.abs(s.resources.money);
+            s.resources.money = 0;
+            s.economy.interest += 0.01; // Credit rating drops
+            if(s.economy.interest > 50) this.triggerEvent("EKONOMİK ÇÖKÜŞ", "Ülke iflas etti. IMF kontrolü devraldı.", []);
+        }
+
+        // --- PRODUCTION CYCLE ---
+        s.production.forEach(p => {
+            p.progress += p.factories * 0.5;
+            if(p.progress >= 100) {
+                p.progress = 0;
+                s.stockpile[p.id] += (p.id==='gun'?100 : (p.id==='tank'?1:0.5));
+            }
+        });
+
+        // --- TERROR & INTEL CYCLE ---
+        if(s.date.getDate() % 15 === 0) { // Every 15 days
+            s.provinces.forEach(p => {
+                // Terror growth
+                if(!p.isForeign && p.hiddenCells > 0) {
+                    p.risk += 2;
+                    p.hiddenCells += 0.5;
+                    // Attack chance
+                    if(p.risk > 80 && Math.random() < 0.1) {
+                        this.triggerEvent("TERÖR SALDIRISI", `${p.name} bölgesinde bombalı eylem! ${Math.floor(Math.random()*20)} şehit var.`, [
+                            {txt:"İntikam Al", act:()=>{s.country.stability-=5; s.country.warSupport+=5;}},
+                            {txt:"Yayın Yasağı Getir", act:()=>{s.country.stability+=2; s.resources.pp-=20;}}
+                        ]);
+                        p.risk = 60; // Reset slightly
+                        p.gdp -= 2;
                     }
                 }
-            });
-        },
-
-        setupMap() {
-            const canvas = document.getElementById('map-canvas');
-            const ctx = canvas.getContext('2d');
-            
-            const resize = () => {
-                canvas.width = canvas.parentElement.offsetWidth;
-                canvas.height = canvas.parentElement.offsetHeight;
-                this.drawMap(ctx);
-            };
-
-            window.addEventListener('resize', resize);
-            resize();
-        },
-
-        drawMap(ctx) {
-            const w = ctx.canvas.width;
-            const h = ctx.canvas.height;
-            ctx.clearRect(0,0,w,h);
-
-            // Grid
-            ctx.strokeStyle = 'rgba(212, 175, 55, 0.05)';
-            for(let i=0; i<w; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-            for(let j=0; j<h; j+=40) { ctx.beginPath(); ctx.moveTo(0,j); ctx.lineTo(w,j); ctx.stroke(); }
-
-            // Ülke Sınırları (Stylized)
-            const drawCountry = (x, y, scale, color, name) => {
-                ctx.save();
-                ctx.translate(x, y);
-                ctx.beginPath();
-                ctx.moveTo(0,0); ctx.lineTo(100*scale, 20*scale); ctx.lineTo(120*scale, 80*scale);
-                ctx.lineTo(40*scale, 100*scale); ctx.lineTo(-20*scale, 60*scale);
-                ctx.closePath();
-                ctx.fillStyle = color;
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
-                ctx.stroke();
                 
-                ctx.fillStyle = "#fff";
-                ctx.font = "bold 10px Inter";
-                ctx.fillText(name, 20*scale, 50*scale);
-                ctx.restore();
-            };
-
-            // Map Modes
-            let colorMain = 'rgba(0, 210, 255, 0.2)';
-            if(this.mapMode === 'eco') colorMain = 'rgba(57, 255, 20, 0.2)';
-            if(this.mapMode === 'mil') colorMain = 'rgba(255, 62, 62, 0.2)';
-
-            drawCountry(w*0.3, h*0.3, 1.5, colorMain, "ANAVATAN");
-            drawCountry(w*0.6, h*0.2, 1.2, 'rgba(255,255,255,0.05)', "DOĞU BLOKU");
-            drawCountry(w*0.1, h*0.6, 1.3, 'rgba(255,255,255,0.05)', "BATI İTTİFAKI");
-        },
-
-        startLoop() {
-            this.loopInterval = setInterval(() => {
-                this.tick();
-            }, 3000); // Her 3 saniyede 1 ay ilerler
-        },
-
-        tick() {
-            // Zaman İlerleyişi
-            this.state.date.setMonth(this.state.date.getMonth() + 1);
-
-            // Ekonomik Simülasyon (Karmaşık Diferansiyel)
-            const oldInf = this.state.inflation;
-            const rateGap = this.state.rate - 5.0; // 5.0 Nötr faiz
-            
-            // Faiz artarsa enflasyon düşer, ama büyüme yavaşlar
-            this.state.inflation -= rateGap * 0.15;
-            this.state.inflation += (Math.random() - 0.4) * 0.5; // Rastgele şoklar
-            this.state.inflation = Math.max(0.1, this.state.inflation);
-
-            // Kur: Enflasyon farkı ve istikrarla belirlenir
-            const fxPressure = (this.state.inflation / 2) + (100 - this.state.stability) / 20;
-            this.state.fx += (fxPressure - 1.0) * 0.02;
-            this.state.fx = Math.max(0.5, this.state.fx);
-
-            // Bütçe
-            const taxRevenue = (this.state.civFactories * 100000) / this.state.fx;
-            const militaryCost = (this.state.military.infantry * 10000) + (this.state.milFactories * 20000);
-            this.state.money += (taxRevenue - militaryCost);
-
-            // Borsa Hareketleri
-            this.state.market.forEach(s => {
-                const change = (Math.random() - 0.5) * 5 + (this.state.stability - 90)/5;
-                s.price += change;
-                s.trend = change;
+                // Intel Decay
+                if(p.intelLevel > 10) p.intelLevel -= 0.5;
             });
-
-            // Stabilite Kaybı
-            if(this.state.inflation > 15) this.state.stability -= 1;
-            if(this.state.money < 0) this.state.stability -= 5;
-
-            // Veri Güncelleme
-            this.state.history.inf.push(this.state.inflation.toFixed(2));
-            this.state.history.fx.push(this.state.fx.toFixed(2));
-            if(this.state.history.inf.length > 20) {
-                this.state.history.inf.shift();
-                this.state.history.fx.shift();
-            }
-
-            this.updateUI();
-            this.checkCrises();
-        },
-
-        updateUI() {
-            document.getElementById('val-money').innerText = "$" + (this.state.money / 1000000).toFixed(2) + "M";
-            document.getElementById('val-fx').innerText = this.state.fx.toFixed(2);
-            document.getElementById('val-inf').innerText = this.state.inflation.toFixed(1) + "%";
-            document.getElementById('val-stb').innerText = Math.floor(this.state.stability) + "%";
-            document.getElementById('val-rate').innerText = this.state.rate.toFixed(2) + "%";
-            document.getElementById('val-civ').innerText = this.state.civFactories;
-            document.getElementById('val-mil-fact').innerText = this.state.milFactories;
-            document.getElementById('val-infantry').innerText = this.state.military.infantry;
-
-            const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
-            document.getElementById('val-date').innerText = `1 ${months[this.state.date.getMonth()]} ${this.state.date.getFullYear()}`;
-
-            // Bars
-            document.getElementById('bar-ind').style.width = Math.min(100, (this.state.civFactories + this.state.milFactories) * 5) + "%";
-
-            this.renderStocks();
-            if(this.chart) this.chart.update();
-        },
-
-        renderStocks() {
-            const container = document.getElementById('stock-list');
-            container.innerHTML = '';
-            this.state.market.forEach(s => {
-                const row = document.createElement('div');
-                row.className = 'market-row';
-                row.innerHTML = `
-                    <span>${s.name}</span>
-                    <span class="${s.trend >= 0 ? 'trend-up' : 'trend-down'}">
-                        ${s.price.toFixed(2)} (${s.trend >= 0 ? '▲' : '▼'})
-                    </span>
-                `;
-                container.appendChild(row);
-            });
-        },
-
-        adjustRate(val) {
-            this.state.rate += val;
-            this.log(`Merkez Bankası faizi %${this.state.rate.toFixed(2)} seviyesine çekildi.`);
-            this.updateUI();
-        },
-
-        build(type) {
-            const cost = type === 'civ' ? 250000 : 400000;
-            if(this.state.money >= cost) {
-                this.state.money -= cost;
-                if(type === 'civ') this.state.civFactories++;
-                else this.state.milFactories++;
-                this.log(`${type === 'civ' ? 'Sivil' : 'Askeri'} fabrika hattı tamamlandı.`);
-                this.toast("İnşaat Başarılı");
-            } else {
-                this.toast("Yetersiz Fon!", "error");
-            }
-        },
-
-        train(unit) {
-            const cost = 100000;
-            if(this.state.money >= cost && this.state.milFactories > 0) {
-                this.state.money -= cost;
-                this.state.military.infantry++;
-                this.log("Yeni piyade tümeni göreve hazır.");
-            } else {
-                this.toast("Üretim Kapasitesi Yetersiz", "error");
-            }
-        },
-
-        enact(policy) {
-            this.log(`Politika yürürlüğe girdi: ${policy}`);
-            if(policy === 'tax_hike') {
-                this.state.stability -= 5;
-                this.state.money += 1000000;
-            }
-            if(policy === 'welfare') {
-                this.state.stability += 8;
-                this.state.money -= 500000;
-            }
-            this.updateUI();
-        },
-
-        checkCrises() {
-            const alert = document.getElementById('crisis-alert');
-            if(this.state.inflation > 20) {
-                alert.innerText = "HİPERENFLASYON RİSKİ!";
-                this.state.stability -= 2;
-            } else if(this.state.money < 0) {
-                alert.innerText = "DEVLET İFLASIN EŞİĞİNDE!";
-            } else {
-                alert.innerText = "Sistem Stabil.";
-            }
-        },
-
-        setMapMode(mode) {
-            this.mapMode = mode;
-            const labels = { pol: 'SİYASİ HARİTA', eco: 'EKONOMİK VERİLER', mil: 'ASKERİ KONUŞLANMA' };
-            document.getElementById('map-mode').innerText = labels[mode];
-            this.setupMap();
-        },
-
-        log(msg) {
-            const log = document.getElementById('terminal-log');
-            const entry = document.createElement('div');
-            entry.innerText = `> ${new Date().toLocaleTimeString()}: ${msg}`;
-            log.prepend(entry);
-        },
-
-        toast(msg, type="info") {
-            const container = document.getElementById('toast-container');
-            const t = document.createElement('div');
-            t.className = 'toast';
-            if(type === 'error') t.style.background = 'var(--neon-red)';
-            t.innerText = msg;
-            container.appendChild(t);
-            setTimeout(() => t.remove(), 3000);
         }
-    };
-     if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("./sw.js").then(() => console.log("SW Aktif")).catch(err => console.log("SW Hata", err));
-    }
 
-    window.onload = () => game.init();
+        // --- SAVE SYSTEM ---
+        if(s.date.getDate() === 1) this.saveGame();
+
+        ui.update();
+        map.draw();
+    },
+
+    // --- ACTIONS ---
+    recruit(type) {
+        const s = this.state;
+        let cost = {gun:0, tank:0, money:0};
+        
+        if(type === 'infantry') { cost.gun=1000; cost.money=100; }
+        if(type === 'tank') { cost.tank=50; cost.money=500; }
+        if(type === 'specops') { cost.gun=500; cost.money=300; }
+
+        if(s.stockpile.gun >= cost.gun && s.stockpile.tank >= cost.tank && s.resources.money >= cost.money) {
+            s.stockpile.gun -= cost.gun;
+            s.stockpile.tank -= cost.tank;
+            s.resources.money -= cost.money;
+            s.army.push({type:type, str:100, exp:0});
+            ui.log(`Yeni birlik kuruldu: ${type.toUpperCase()}`);
+        } else ui.log("YETERSİZ KAYNAK!", true);
+    },
+
+    provOp(type) {
+        const p = this.state.provinces[this.selectedProvId];
+        if(!p) return;
+
+        if(type === 'invest') {
+            if(this.state.resources.money >= 50) {
+                this.state.resources.money -= 50;
+                p.gdp += 5;
+                p.loyalty += 2;
+                ui.log(`${p.name} bölgesine yatırım yapıldı.`);
+            }
+        }
+        else if(type === 'intel') {
+            if(this.state.resources.intel >= 20) {
+                this.state.resources.intel -= 20;
+                p.intelLevel = 100;
+                const found = p.hiddenCells > 0;
+                ui.log(`İstihbarat raporu: ${p.name} - ${found ? 'HÜCRE TESPİT EDİLDİ' : 'TEMİZ'}`);
+            }
+        }
+        else if(type === 'raid') {
+            if(this.state.resources.pp >= 50) {
+                this.state.resources.pp -= 50;
+                if(p.hiddenCells > 0) {
+                    p.hiddenCells = Math.max(0, p.hiddenCells - 30);
+                    p.risk -= 20;
+                    ui.log("Hücre evi basıldı. Tehdit azaldı.");
+                } else {
+                    p.loyalty -= 10;
+                    ui.log("Yanlış istihbarat! Siviller zarar gördü.");
+                }
+            }
+        }
+    },
+
+    setTax(val) {
+        this.state.economy.taxRate = parseInt(val);
+        document.getElementById('tax-val').innerText = val;
+    },
+
+    passLaw(id) {
+        if(this.state.resources.pp >= 100) {
+            this.state.resources.pp -= 100;
+            this.state.country.stability += 5;
+            ui.log("Yasa meclisten geçti.");
+        }
+    },
     
-</script>
+    toggleDefcon() {
+        let d = this.state.country.defcon;
+        d--; if(d<1) d=5;
+        this.state.country.defcon = d;
+        const el = document.querySelector('.defcon-box');
+        el.innerText = "DEFCON " + d;
+        if(d===1) { el.style.background = "#fff"; el.style.color="#000"; }
+        else { el.style.background = "transparent"; el.style.color="var(--cyber-red)"; }
+    },
 
+    triggerEvent(title, body, actions) {
+        this.paused = true;
+        const m = document.getElementById('event-modal');
+        document.getElementById('ev-title').innerText = title;
+        document.getElementById('ev-body').innerText = body;
+        const f = document.getElementById('ev-actions');
+        f.innerHTML = '';
+        
+        if(actions.length === 0) actions.push({txt:"TAMAM", act:()=>{}});
+        
+        actions.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-main';
+            btn.style.width = 'auto';
+            btn.innerText = a.txt;
+            btn.onclick = () => {
+                a.act();
+                m.style.display = 'none';
+                this.paused = false;
+            };
+            f.appendChild(btn);
+        });
+        
+        m.style.display = 'flex';
+    },
+
+    // --- SAVE/LOAD ---
+    saveGame() {
+        const data = JSON.stringify(this.state);
+        localStorage.setItem('aeterna_save_v4', data);
+        ui.log("OYUN KAYDEDİLDİ.", false);
+    },
+    loadGame() {
+        const data = localStorage.getItem('aeterna_save_v4');
+        if(data) {
+            try {
+                const s = JSON.parse(data);
+                s.date = new Date(s.date);
+                this.state = s;
+                ui.log("KAYIT YÜKLENDİ.");
+            } catch(e) { console.error("Save Corrupt"); }
+        }
+    },
+    getDateStr() {
+        return this.state.date.toLocaleDateString('tr-TR', {day:'numeric', month:'long', year:'numeric'});
+    }
+};
+
+/* --- UI & MAP --- */
+const ui = {
+    chart: null,
+    init() {
+        this.renderCabinet();
+        this.renderTechs();
+        
+        // Parliament Chart
+        const ctx = document.getElementById('parliament-chart').getContext('2d');
+        this.chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['İktidar', 'Muhalefet', 'Tarafsız'],
+                datasets: [{data: [300, 250, 50], backgroundColor: ['#00f3ff', '#ff2a2a', '#888'], borderWidth:0}]
+            },
+            options: { cutout: '60%', plugins: {legend:{display:false}} }
+        });
+    },
+
+    update() {
+        const s = game.state;
+        
+        // Header
+        document.getElementById('hud-money').innerText = '$' + Math.floor(s.resources.money) + 'M';
+        document.getElementById('hud-gdp').innerText = '$' + Math.floor(s.economy.gdp) + 'B';
+        document.getElementById('hud-inf').innerText = s.economy.inflation.toFixed(1) + '%';
+        document.getElementById('hud-stab').innerText = Math.floor(s.country.stability) + '%';
+        document.getElementById('hud-pp').innerText = Math.floor(s.resources.pp);
+        document.getElementById('hud-intel').innerText = Math.floor(s.resources.intel);
+        document.getElementById('date-display').innerText = game.getDateStr();
+
+        // Eco
+        document.getElementById('eco-debt').innerText = '$' + Math.floor(s.economy.debt) + 'B';
+        const ratio = Math.floor((s.economy.debt / s.economy.gdp)*100);
+        document.getElementById('eco-debt-ratio').innerText = ratio + '%';
+        document.getElementById('fill-debt').style.width = Math.min(100, ratio) + '%';
+
+        // Military
+        document.getElementById('mil-manpower').innerText = (s.country.manpower / 1000).toFixed(0) + 'k';
+        document.getElementById('cnt-inf').innerText = s.army.filter(x=>x.type==='infantry').length;
+        document.getElementById('cnt-tank').innerText = s.army.filter(x=>x.type==='tank').length;
+
+        // Prod Lines
+        const pc = document.getElementById('production-lines');
+        pc.innerHTML = '';
+        s.production.forEach(p => {
+            pc.innerHTML += `
+                <div style="font-size:11px; margin-bottom:5px;">
+                    <div class="row-kv"><span>${p.name}</span> <span>${Math.floor(p.progress)}%</span></div>
+                    <div class="bar-cont"><div class="bar-fill" style="width:${p.progress}%; background:var(--cyber-gold)"></div></div>
+                </div>
+            `;
+        });
+        
+        // Province Detail Updates
+        if(game.selectedProvId !== null) {
+            const p = s.provinces[game.selectedProvId];
+            document.getElementById('pd-risk').innerText = Math.floor(p.risk) + '%';
+            document.getElementById('pd-loyalty').innerText = Math.floor(p.loyalty) + '%';
+            document.getElementById('pd-cells').innerText = p.intelLevel > 80 ? p.hiddenCells.toFixed(0) : '???';
+            document.getElementById('pd-bar-terror').style.width = p.risk + '%';
+        }
+    },
+
+    tab(side, id) {
+        // Simple tab switcher
+        const p = side==='l' ? 0 : 2;
+        const panel = document.querySelectorAll('.panel')[p];
+        panel.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        panel.querySelectorAll('.content-area').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(`tab-${side}-${id}`).classList.add('active');
+    },
+
+    renderCabinet() {
+        const c = document.getElementById('cabinet-container');
+        Object.values(game.state.cabinet).forEach(min => {
+            c.innerHTML += `
+                <div class="minister-card">
+                    <div class="min-role">${min.role}</div>
+                    <div class="min-name">${min.name}</div>
+                    <div class="min-stat">${min.buff}</div>
+                </div>
+            `;
+        });
+    },
+
+    renderTechs() {
+        const t = document.getElementById('tech-tree-container');
+        DATA.techs.forEach(tech => {
+            t.innerHTML += `
+                <div style="border:1px solid #333; padding:5px; margin-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:12px;">${tech.name}</span>
+                    <button class="btn-main" style="width:auto; padding:2px 5px; font-size:10px; margin:0;" onclick="ui.log('Yetersiz puan',true)">${tech.cost} RP</button>
+                </div>
+            `;
+        });
+    },
+
+    log(msg, isErr) {
+        const l = document.getElementById('intel-logs');
+        const c = isErr ? 'var(--cyber-red)' : '#888';
+        l.innerHTML = `<div style="color:${c}">> ${msg}</div>` + l.innerHTML;
+    }
+};
+
+/* --- MAP RENDERER --- */
+const map = {
+    ctx: null,
+    canvas: null,
+    mode: 'pol',
+
+    init() {
+        this.canvas = document.getElementById('map-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        
+        // Interaction
+        this.canvas.addEventListener('mousedown', e => this.click(e));
+        
+        // Resize
+        new ResizeObserver(()=>this.resize()).observe(document.getElementById('map-wrapper'));
+        this.resize();
+        this.animate();
+    },
+
+    setMode(m) {
+        this.mode = m;
+        document.querySelectorAll('.map-mode').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    },
+
+    resize() {
+        this.canvas.width = document.getElementById('map-wrapper').offsetWidth;
+        this.canvas.height = document.getElementById('map-wrapper').offsetHeight;
+    },
+
+    draw() {
+        const ctx = this.ctx;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
+        
+        // BG
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0,0,w,h);
+        
+        // Grid
+        ctx.strokeStyle = '#111';
+        ctx.lineWidth = 1;
+        for(let i=0; i<w; i+=50) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
+        
+        // Connections
+        ctx.strokeStyle = '#333';
+        game.state.provinces.forEach(p1 => {
+            game.state.provinces.forEach(p2 => {
+                if(Math.hypot(p1.x-p2.x, p1.y-p2.y) < 150 && p1!==p2) {
+                    ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                }
+            });
+        });
+
+        // Nodes
+        game.state.provinces.forEach(p => {
+            let color = '#555';
+            let radius = 5 + (p.pop);
+
+            if(this.mode === 'pol') {
+                color = p.isForeign ? '#ff2a2a' : '#00f3ff';
+            }
+            else if(this.mode === 'terror') {
+                const r = p.intelLevel > 50 ? p.risk : p.risk/2; // Fog of war effect
+                color = `rgb(${r*2.5}, 50, 50)`;
+            }
+            else if(this.mode === 'fog') {
+                color = `rgba(0, 243, 255, ${p.intelLevel/100})`;
+            }
+
+            // Selection Pulse
+            if(game.selectedProvId === p.id) {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#fff';
+                ctx.fillStyle = '#fff';
+            } else {
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = color;
+            }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, radius, 0, Math.PI*2);
+            ctx.fill();
+
+            // Labels
+            ctx.fillStyle = '#ccc';
+            ctx.font = '11px Rajdhani';
+            ctx.textAlign = 'center';
+            ctx.fillText(p.name, p.x, p.y - radius - 5);
+            
+            // Icons
+            if(p.risk > 70 && !p.isForeign && Math.floor(Date.now()/500)%2===0) {
+                ctx.fillStyle = 'red';
+                ctx.fillText('!', p.x, p.y+4);
+            }
+        });
+    },
+
+    animate() {
+        this.draw();
+        requestAnimationFrame(()=>this.animate());
+    },
+
+    click(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        let hit = null;
+        game.state.provinces.forEach(p => {
+            if(Math.hypot(mx-p.x, my-p.y) < 20) hit = p;
+        });
+
+        if(hit) {
+            game.selectedProvId = hit.id;
+            document.getElementById('province-detail').style.display = 'block';
+            document.getElementById('pd-name').innerText = hit.name;
+            document.getElementById('pd-pop').innerText = hit.pop + 'M';
+            ui.update();
+        } else {
+            game.selectedProvId = null;
+            document.getElementById('province-detail').style.display = 'none';
+        }
+    }
+};
+
+window.onload = () => game.init();
+
+</script>
 </body>
 </html>
-
-
