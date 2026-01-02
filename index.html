@@ -584,13 +584,15 @@
             setTimeout(() => t.remove(), 3000);
         }
     };
-
-    window.onload = () => game.init();
      if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./sw.js").then(() => console.log("SW Aktif")).catch(err => console.log("SW Hata", err));
     }
+
+    window.onload = () => game.init();
+    
 </script>
 
 </body>
 </html>
+
 
