@@ -4,7 +4,7 @@
   "description": "Aeterna OS Web Game",
   "start_url": "https://ardatrnn.github.io/Aeterna/",
   "scope": "https://ardatrnn.github.io/Aeterna/",
-  "display": "fullscreen",
+  "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
