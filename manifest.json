@@ -6,5 +6,19 @@
   "scope": "https://ardatrnn.github.io/Aeterna/",
   "display": "fullscreen",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff"
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "https://ardatrnn.github.io/Aeterna/aaaterna.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://ardatrnn.github.io/Aeterna/aeterna-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
 }
