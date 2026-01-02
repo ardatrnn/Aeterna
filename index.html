@@ -6,6 +6,7 @@
     <title>AETERNA: IMPERIUM | GRAND STRATEGY</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="manifest" href="https://ardatrnn.github.io/Aeterna/manifest.json">
     <style>
         :root {
             --gold: #d4af37;
@@ -585,7 +586,11 @@
     };
 
     window.onload = () => game.init();
+     if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").then(() => console.log("SW Aktif")).catch(err => console.log("SW Hata", err));
+    }
 </script>
 
 </body>
 </html>
+
