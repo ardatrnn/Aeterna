@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AETERNA OS v9.0 | OMNIPOTENCE PROTOCOL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AETERNA OS v11.0 | GLOBAL ECONOMY</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="https://ardatrnn.github.io/Aeterna/manifest.json">
@@ -11,15 +11,15 @@
         :root {
             --gold: #c5a059;
             --gold-light: #e2c999;
-            --bg-deep: #08090b;
-            --panel-bg: rgba(20, 22, 26, 0.95);
+            --bg-deep: #050505;
+            --panel-bg: rgba(15, 15, 20, 0.98);
             --border-ui: 1px solid rgba(197, 160, 89, 0.3);
             --danger: #ff4d4d;
             --success: #2ecc71;
             --info: #3498db;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             background-color: var(--bg-deep);
             color: #d1d5db;
@@ -31,34 +31,49 @@
             overflow: hidden;
         }
 
-        /* --- TOP BAR (CROWN INTERFACE) --- */
+        /* --- TOP BAR --- */
         #top-bar {
-            height: 50px;
+            height: auto;
+            min-height: 60px;
             background: #000;
             border-bottom: 2px solid var(--gold);
             display: flex;
             align-items: center;
-            padding: 0 20px;
-            gap: 25px;
+            padding: 5px 15px;
+            gap: 10px;
             z-index: 1000;
-            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
-        .res-pill { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .res-pill { 
+            display: flex; align-items: center; gap: 6px; 
+            background: rgba(255,255,255,0.05); padding: 5px 10px; 
+            border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.75rem;
+        }
         .res-pill span { font-weight: 800; color: #fff; }
-        .res-pill i { color: var(--gold); font-style: normal; font-size: 0.7rem; }
+        .res-pill i { color: var(--gold); font-style: normal; font-size: 0.6rem; font-weight: bold; }
 
-        /* --- MAIN DASHBOARD --- */
+        /* --- MAIN LAYOUT --- */
         #main-layout {
             flex: 1;
             display: grid;
-            grid-template-columns: 350px 1fr 380px;
+            grid-template-columns: 320px 1fr 350px;
             gap: 10px;
             padding: 10px;
-            background: radial-gradient(circle at center, #1a1c22 0%, #08090b 100%);
+            overflow: hidden;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
         }
 
-        .column { display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        @media (max-width: 1200px) {
+            #main-layout { grid-template-columns: 1fr; overflow-y: auto; display: block; }
+            .column { height: auto !important; margin-bottom: 10px; }
+            #map-area { height: 350px !important; }
+            #chart-container { height: 250px !important; }
+        }
+
+        .column { display: flex; flex-direction: column; gap: 10px; overflow: hidden; height: 100%; }
 
         /* --- WIDGETS --- */
         .widget {
@@ -67,440 +82,352 @@
             border-radius: 4px;
             display: flex;
             flex-direction: column;
-            position: relative;
         }
         .widget-h {
             padding: 10px 15px;
-            background: rgba(197, 160, 89, 0.1);
+            background: rgba(197, 160, 89, 0.15);
             font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--gold-light);
             border-bottom: var(--border-ui);
-            display: flex;
-            justify-content: space-between;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .widget-b { padding: 15px; flex: 1; overflow-y: auto; }
+        .widget-b { padding: 12px; flex: 1; overflow-y: auto; }
 
-        /* --- MAP INTERFACE --- */
-        #map-area {
-            position: relative;
-            background: #0d0e12;
-            border: var(--border-ui);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: inset 0 0 50px #000;
-        }
-        #map-canvas { width: 100%; height: 100%; cursor: grab; }
-        .map-controls {
-            position: absolute; bottom: 20px; right: 20px;
-            display: flex; gap: 10px;
-        }
-        .map-btn {
-            background: var(--panel-bg); border: var(--border-ui); color: var(--gold);
-            padding: 8px 15px; cursor: pointer; font-size: 0.7rem; font-weight: bold;
-        }
+        /* --- CHART & MAP --- */
+        #chart-container { height: 180px; width: 100%; }
+        #map-area { flex: 1; background: #000; position: relative; min-height: 300px; border-radius: 4px; overflow: hidden; }
+        #map-canvas { width: 100%; height: 100%; touch-action: none; }
 
-        /* --- POPS & SOCIAL CLASSES --- */
-        .pop-card {
-            background: rgba(0,0,0,0.3); border-radius: 4px; padding: 10px; margin-bottom: 8px;
-            border-left: 4px solid var(--info);
+        /* --- ACTION ITEMS --- */
+        .action-btn {
+            width: 100%; padding: 10px; background: #111; border: 1px solid #333;
+            color: #ddd; cursor: pointer; margin-bottom: 5px; border-radius: 4px;
+            font-size: 0.7rem; text-align: left; transition: 0.2s;
         }
-        .pop-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; }
-        .meter { height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
-        .meter-fill { height: 100%; transition: width 0.5s; }
+        .action-btn:hover { border-color: var(--gold); background: #1a1a1a; }
+        .action-btn:active { background: var(--gold); color: #000; }
 
-        /* --- ECONOMY & PRODUCTION --- */
-        .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .factory-item {
-            padding: 8px; background: rgba(255,255,255,0.03); border: 1px solid #333;
-            border-radius: 4px; font-size: 0.75rem;
-        }
-        .factory-item b { color: var(--gold-light); }
+        .stat-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #222; font-size: 0.75rem; }
+        .stat-val { font-weight: bold; color: #fff; }
 
-        /* --- ACTION CENTER --- */
-        .tabs { display: flex; border-bottom: var(--border-ui); }
-        .tab-btn {
-            flex: 1; padding: 10px; background: none; border: none; color: #666;
-            cursor: pointer; font-size: 0.7rem; font-weight: bold;
-        }
-        .tab-btn.active { color: var(--gold); background: rgba(197, 160, 89, 0.1); border-bottom: 2px solid var(--gold); }
+        /* --- LOGS --- */
+        #log-feed { font-family: 'Fira Code', monospace; font-size: 0.65rem; color: #888; }
+        .log-entry { margin-bottom: 4px; border-left: 2px solid #444; padding-left: 5px; }
+        .log-entry.crit { color: var(--danger); border-color: var(--danger); }
+        .log-entry.success { color: var(--success); border-color: var(--success); }
 
-        /* --- NEWS & LOG --- */
-        #news-ticker {
-            height: 30px; background: #c5a059; color: #000; font-weight: bold;
-            display: flex; align-items: center; padding: 0 20px; font-size: 0.75rem;
-            overflow: hidden; white-space: nowrap;
-        }
-        .ticker-wrap { animation: ticker 30s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        /* --- NOTIFICATIONS --- */
-        .log-entry { font-size: 0.7rem; padding: 5px 0; border-bottom: 1px solid #222; opacity: 0.8; }
-        .log-entry.crit { color: var(--danger); font-weight: bold; }
-
-        /* --- MODALS --- */
+        /* --- MODAL --- */
         #global-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.9);
             display: none; align-items: center; justify-content: center; z-index: 5000;
         }
         .modal-box {
-            width: 600px; background: var(--panel-bg); border: 2px solid var(--gold);
-            padding: 30px; position: relative;
-        }
-        .btn-prime {
-            width: 100%; padding: 12px; background: var(--gold); border: none;
-            color: #000; font-weight: bold; cursor: pointer; margin-top: 10px;
+            width: 90%; max-width: 450px; background: #111; border: 2px solid var(--gold);
+            padding: 20px; border-radius: 4px;
         }
 
-        /* --- BUTTONS --- */
-        .action-btn {
-            width: 100%; padding: 10px; background: #1a1c22; border: 1px solid #333;
-            color: #ccc; cursor: pointer; margin-bottom: 5px; text-align: left;
-            font-size: 0.75rem; border-radius: 2px;
+        #news-ticker {
+            height: 30px; background: var(--gold); color: #000;
+            display: flex; align-items: center; font-size: 0.7rem; font-weight: 800;
+            overflow: hidden; white-space: nowrap;
         }
-        .action-btn:hover { border-color: var(--gold); color: #fff; }
+        .ticker-text { display: inline-block; animation: scroll 30s linear infinite; }
+        @keyframes scroll { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
 <div id="top-bar">
-    <div style="font-family:'Cinzel'; color:var(--gold); font-size:1.2rem; margin-right:20px;">AETERNA<span>.OMNI</span></div>
-    <div class="res-pill"><i>FON</i> <span id="val-money">1.2M$</span></div>
-    <div class="res-pill"><i>ÇELİK</i> <span id="val-steel">450</span></div>
-    <div class="res-pill"><i>TAHIL</i> <span id="val-grain">1.2K</span></div>
-    <div class="res-pill"><i>ENERJİ</i> <span id="val-power">85%</span></div>
-    <div class="res-pill"><i>İSTİKRAR</i> <span id="val-stability" style="color:var(--success)">92%</span></div>
-    <div style="flex:1"></div>
-    <div id="game-date" style="font-weight:bold; color:var(--gold-light)">1 OCAK 1936</div>
+    <div style="font-family:'Cinzel'; color:var(--gold); font-size:1rem; padding-right:10px;">AETERNA.v11</div>
+    <div class="res-pill"><i>$</i> <span id="ui-money">1.2M</span></div>
+    <div class="res-pill"><i>KUR</i> <span id="ui-fx">1.00</span></div>
+    <div class="res-pill"><i>ENF</i> <span id="ui-inf">2.0%</span></div>
+    <div class="res-pill"><i>FE</i> <span id="ui-steel">450</span></div>
+    <div class="res-pill"><i>STB</i> <span id="ui-stb">92%</span></div>
+    <div id="game-date" style="margin-left:auto; color:var(--gold-light); font-weight: bold; font-size: 0.7rem;">1 OCAK 1936</div>
 </div>
 
 <div id="news-ticker">
-    <div class="ticker-wrap" id="ticker-content">DÜNYA HABERLERİ: AETERNA KONSEYİ TOPLANIYOR... BORSALARDA HAREKETLİLİK...</div>
+    <div class="ticker-text" id="ticker-content">PIYASALAR ACILDI... MERKEZ BANKASI VERILERI BEKLENIYOR... ENFLASYON HEDEFI %2...</div>
 </div>
 
 <main id="main-layout">
-    <!-- LEFT: INTERNAL AFFAIRS -->
+    <!-- SOL KOLON: EKONOMI VE NUFUZ -->
     <div class="column">
-        <div class="widget" style="flex: 1.5;">
-            <div class="widget-h">TOPLUMSAL SINIFLAR & POPS</div>
+        <div class="widget">
+            <div class="widget-h">EKONOMIK GÖSTERGELER</div>
             <div class="widget-b">
-                <div class="pop-card">
-                    <div class="pop-header"><span>İŞÇİLER (4.2M)</span> <span>Radikalizm: 12%</span></div>
-                    <div class="meter"><div id="pop-workers" class="meter-fill" style="width: 85%; background: var(--info);"></div></div>
-                </div>
-                <div class="pop-card" style="border-left-color: var(--gold);">
-                    <div class="pop-header"><span>ARİSTOKRATLAR (200K)</span> <span>Memnuniyet: 90%</span></div>
-                    <div class="meter"><div id="pop-elites" class="meter-fill" style="width: 90%; background: var(--gold);"></div></div>
-                </div>
-                <div class="pop-card" style="border-left-color: var(--success);">
-                    <div class="pop-header"><span>KÖYLÜLER (8.5M)</span> <span>Verim: 65%</span></div>
-                    <div class="meter"><div id="pop-peasants" class="meter-fill" style="width: 65%; background: var(--success);"></div></div>
+                <div id="chart-container"><canvas id="econChart"></canvas></div>
+                <div class="stat-row"><span>Politika Faizi:</span> <span class="stat-val" id="ui-rate">5.0%</span></div>
+                <div class="stat-row"><span>Bütçe Dengesi:</span> <span class="stat-val" id="ui-budget">+12K</span></div>
+                <div style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <button class="action-btn" onclick="game.adjustRate(0.5)">Faiz Arttır</button>
+                    <button class="action-btn" onclick="game.adjustRate(-0.5)">Faiz Düşür</button>
                 </div>
             </div>
         </div>
 
-        <div class="widget" style="flex: 1;">
-            <div class="widget-h">SANAYİ VE ÜRETİM</div>
+        <div class="widget" style="flex:1">
+            <div class="widget-h">TOPLUMSAL YAPI</div>
             <div class="widget-b">
-                <div class="prod-grid">
-                    <div class="factory-item">
-                        <b>Çelik Fabrikası</b><br>Seviye 4 | <span style="color:var(--success)">+12/ay</span>
-                    </div>
-                    <div class="factory-item">
-                        <b>Mühimmat Hattı</b><br>Seviye 2 | <span style="color:var(--info)">Aktif</span>
-                    </div>
-                    <div class="factory-item">
-                        <b>Tarım Koop.</b><br>Seviye 8 | <span style="color:var(--success)">+45/ay</span>
-                    </div>
-                    <div class="factory-item" onclick="game.build()" style="cursor:pointer; border-style:dashed; text-align:center;">
-                        <br><b>+ YENİ İNŞAAT</b>
-                    </div>
+                <div class="stat-row"><span>İşsizlik Oranı:</span> <span class="stat-val" id="ui-unemp">4.5%</span></div>
+                <div class="stat-row"><span>Halk Memnuniyeti:</span> <span class="stat-val" id="ui-pop-stb">88%</span></div>
+                <div style="margin-top:10px;">
+                    <button class="action-btn" onclick="game.enact('welfare')">Sosyal Yardım Dağıt (-$)</button>
+                    <button class="action-btn" onclick="game.enact('job_program')">İstihdam Paketi (-$)</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CENTER: GLOBAL MAP -->
+    <!-- ORTA KOLON: STRATEJI HARITASI -->
     <div class="column">
         <div id="map-area" class="widget">
-            <div class="widget-h">STRATEJİK JEOPOLİTİK HARİTA <span id="map-mode">Siyasi Görünüm</span></div>
+            <div class="widget-h">STRATEJIK HARITA <span id="map-mode">POLITIK</span></div>
             <canvas id="map-canvas"></canvas>
-            <div class="map-controls">
-                <button class="map-btn" onclick="game.setMapMode('political')">SİYASİ</button>
-                <button class="map-btn" onclick="game.setMapMode('resources')">KAYNAK</button>
-                <button class="map-btn" onclick="game.setMapMode('military')">ORDU</button>
+            <div style="position:absolute; bottom:10px; left:10px; display:flex; gap:5px;">
+                <button class="action-btn" style="width:auto; background:rgba(0,0,0,0.8)" onclick="game.setMapMode('political')">Siyasi</button>
+                <button class="action-btn" style="width:auto; background:rgba(0,0,0,0.8)" onclick="game.setMapMode('economic')">Ekonomik</button>
             </div>
         </div>
-        
-        <div class="widget" style="height: 200px;">
-            <div class="widget-h">ULUSAL POLİTİKA VE YASALAR</div>
-            <div class="widget-b" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <button class="action-btn" onclick="game.enact('tax')">Vergi Reformu (+Gelir, -İstikrar)</button>
-                <button class="action-btn" onclick="game.enact('conscription')">Seferberlik İlan Et (+Ordu)</button>
-                <button class="action-btn" onclick="game.enact('education')">Eğitim Yasası (+ArGe, -Para)</button>
-                <button class="action-btn" onclick="game.enact('censorship')">Basın Sansürü (+Kontrol)</button>
+        <div class="widget" style="height:120px;">
+            <div class="widget-h">INŞAAT VE SANAYI</div>
+            <div class="widget-b" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px;">
+                <button class="action-btn" onclick="game.build('steel')">Çelik Fab.</button>
+                <button class="action-btn" onclick="game.build('energy')">Santral</button>
+                <button class="action-btn" onclick="game.build('infra')">Altyapı</button>
             </div>
         </div>
     </div>
 
-    <!-- RIGHT: DIPLOMACY & LOGS -->
+    <!-- SAĞ KOLON: RAPORLAR VE GÜNLÜK -->
     <div class="column">
-        <div class="widget" style="flex: 1;">
-            <div class="widget-h">DİPLOMASİ VE DIŞ İLİŞKİLER</div>
-            <div class="widget-b" id="diplomacy-panel">
-                <!-- Dinamik devletler buraya gelecek -->
-                <div class="pop-card" style="border-left-color: #777;">
-                    <div class="pop-header"><b>Kuzey İmparatorluğu</b> <span style="color:var(--danger)">DÜŞMAN</span></div>
-                    <div style="font-size:0.7rem; color:#888;">Ticaret Ambargosu Uygulanıyor</div>
-                </div>
-                <div class="pop-card" style="border-left-color: var(--info);">
-                    <div class="pop-header"><b>Batı Konfederasyonu</b> <span style="color:var(--info)">MÜTTEFİK</span></div>
-                    <div style="font-size:0.7rem; color:#888;">Karşılıklı Savunma Paktı</div>
-                </div>
+        <div class="widget">
+            <div class="widget-h">DIŞ POLITIKA VE REFORMLAR</div>
+            <div class="widget-b">
+                <button class="action-btn" onclick="game.enact('export')">İhracat Teşviği (+Kur Duyarlı)</button>
+                <button class="action-btn" onclick="game.enact('import_tax')">İthalat Vergisi (-Kur Etkisi)</button>
+                <button class="action-btn" onclick="game.enact('print_money')">Para Bas (!! Enflasyon !!)</button>
             </div>
         </div>
 
-        <div class="widget" style="height: 300px;">
-            <div class="tabs">
-                <button class="tab-btn active">KOMUTA MERKEZİ</button>
-                <button class="tab-btn">İSTİHBARAT</button>
-                <button class="tab-btn">BÜTÇE</button>
-            </div>
-            <div class="widget-b" id="log-feed" style="font-family:'Fira Code', monospace; color:#888;">
-                <div class="log-entry">> Sistem Hazır...</div>
-                <div class="log-entry">> Bütçe fazlası tespit edildi: +200K</div>
-                <div class="log-entry crit">> UYARI: İşçi sınıfı arasında hoşnutsuzluk artıyor.</div>
+        <div class="widget" style="flex:1">
+            <div class="widget-h">SISTEM GÜNLÜĞÜ</div>
+            <div class="widget-b" id="log-feed">
+                <div class="log-entry">> Aeterna OS v11.0 Hazır...</div>
             </div>
         </div>
     </div>
 </main>
 
-<!-- EVENT MODAL -->
 <div id="global-overlay">
     <div class="modal-box">
-        <h2 id="modal-title" style="font-family:'Cinzel'; color:var(--gold); margin-top:0;">KRİTİK GELİŞME</h2>
-        <div id="modal-content" style="line-height:1.6; color:#ccc; margin-bottom:20px;"></div>
+        <h2 id="modal-title" style="font-family:'Cinzel'; color:var(--gold); margin:0 0 10px 0;"></h2>
+        <p id="modal-content" style="font-size:0.85rem; line-height:1.5; color:#bbb;"></p>
         <div id="modal-options"></div>
     </div>
 </div>
 
 <script>
-    /* --- OMNIPOTENCE ENGINE --- */
-    
+    // --- EKONOMIK MODEL VE OYUN MANTIGI ---
     const game = {
-        data: {
+        state: {
             money: 1200000,
-            steel: 450,
-            grain: 1200,
-            power: 85,
+            fx: 1.00,
+            inflation: 2.0,
+            rate: 5.0,
+            unemployment: 4.5,
             stability: 92,
-            threat: 5,
+            steel: 450,
             date: new Date(1936, 0, 1),
-            pops: { workers: 85, elites: 90, peasants: 65 },
-            factories: { steel: 4, arms: 2, farms: 8 },
-            mapMode: 'political'
+            factories: 4,
+            history: { inf: [2.0], fx: [1.00], un: [4.5], labels: ['Oca'] }
         },
 
-        init: function() {
+        chart: null,
+
+        init() {
+            this.initChart();
             this.initMap();
             this.startLoop();
+            this.log("Protokol başlatıldı: Ekonomik stabilite aranıyor.", "success");
             this.updateUI();
-            this.log("Aeterna OS Omnipotence Protokolü başarıyla yüklendi.", "success");
         },
 
-        // --- MAP ENGINE ---
-        initMap: function() {
+        initChart() {
+            const ctx = document.getElementById('econChart').getContext('2d');
+            this.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: this.state.history.labels,
+                    datasets: [
+                        { label: 'Enfl.', data: this.state.history.inf, borderColor: '#ff4d4d', borderWidth: 2, tension: 0.3, pointRadius: 0 },
+                        { label: 'Kur', data: this.state.history.fx, borderColor: '#2ecc71', borderWidth: 2, tension: 0.3, pointRadius: 0 }
+                    ]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: '#222' } }, x: { display: false } }
+                }
+            });
+        },
+
+        initMap() {
             const canvas = document.getElementById('map-canvas');
             const ctx = canvas.getContext('2d');
-            
             const resize = () => {
-                canvas.width = canvas.parentElement.clientWidth;
-                canvas.height = canvas.parentElement.clientHeight;
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
                 this.drawMap(ctx);
             };
             window.addEventListener('resize', resize);
             resize();
         },
 
-        drawMap: function(ctx) {
+        drawMap(ctx) {
             const w = ctx.canvas.width;
             const h = ctx.canvas.height;
-            ctx.clearRect(0,0,w,h);
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = 'rgba(197, 160, 89, 0.1)';
+            for(let i=0; i<w; i+=30) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
             
-            // Background Grid
-            ctx.strokeStyle = 'rgba(197, 160, 89, 0.05)';
-            for(let i=0; i<w; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-            for(let i=0; i<h; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
-
-            // Ülkeleri basitleştirilmiş poligonlar olarak çizelim
-            const drawCountry = (pts, color, name) => {
-                ctx.beginPath();
-                ctx.moveTo(pts[0].x, pts[0].y);
-                pts.forEach(p => ctx.lineTo(p.x, p.y));
-                ctx.closePath();
-                ctx.fillStyle = color;
-                ctx.globalAlpha = 0.3;
-                ctx.fill();
-                ctx.strokeStyle = varColor('--gold');
-                ctx.globalAlpha = 0.8;
-                ctx.stroke();
-                
-                ctx.fillStyle = "#fff";
-                ctx.font = "10px Cinzel";
-                ctx.fillText(name, pts[0].x + 20, pts[0].y + 40);
-            };
-
-            const varColor = (name) => getComputedStyle(document.documentElement).getPropertyValue(name);
-
-            // Oyuncu Ülkesi
-            drawCountry([{x:100,y:100}, {x:350,y:80}, {x:400,y:250}, {x:120,y:300}], 'rgba(52, 152, 219, 0.4)', 'AETERNA');
-            // Düşman Ülke
-            drawCountry([{x:380,y:50}, {x:550,y:60}, {x:580,y:200}, {x:420,y:220}], 'rgba(231, 76, 60, 0.4)', 'KUZEY IMP.');
-            // Müttefik
-            drawCountry([{x:50,y:320}, {x:200,y:330}, {x:180,y:450}, {x:40,y:420}], 'rgba(46, 204, 113, 0.4)', 'BATI KONF.');
+            // Örnek Ülke Sınırı
+            ctx.beginPath();
+            ctx.moveTo(w*0.2, h*0.3); ctx.lineTo(w*0.6, h*0.2); ctx.lineTo(w*0.7, h*0.6); ctx.lineTo(w*0.3, h*0.7);
+            ctx.closePath();
+            ctx.fillStyle = this.state.stability > 50 ? 'rgba(46, 204, 113, 0.2)' : 'rgba(231, 76, 60, 0.2)';
+            ctx.fill();
+            ctx.strokeStyle = varColor('--gold');
+            ctx.stroke();
         },
 
-        setMapMode: function(mode) {
-            this.data.mapMode = mode;
-            this.log(`Harita modu değiştirildi: ${mode.toUpperCase()}`);
-            this.drawMap(document.getElementById('map-canvas').getContext('2d'));
+        startLoop() {
+            setInterval(() => this.tick(), 5000);
         },
 
-        // --- CORE LOOP ---
-        startLoop: function() {
-            setInterval(() => {
-                this.tick();
-            }, 3000); // 3 saniyede bir tur/ay döner
-        },
+        tick() {
+            // Tarih ilerletme
+            this.state.date.setMonth(this.state.date.getMonth() + 1);
 
-        tick: function() {
-            // Zaman ilerlemesi
-            this.data.date.setMonth(this.data.date.getMonth() + 1);
-            
-            // Ekonomi Simülasyonu
-            const revenue = (this.data.factories.farms * 5000) + (this.data.factories.steel * 12000);
-            const expenses = (this.data.stability < 50 ? 50000 : 20000);
-            this.data.money += (revenue - expenses);
-            
-            // Kaynak Üretimi
-            this.data.steel += this.data.factories.steel * 3;
-            this.data.grain += this.data.factories.farms * 10;
-            
-            // Popülasyon Dinamiği
-            if(this.data.grain < 500) {
-                this.data.pops.workers -= 2;
-                this.data.stability -= 5;
-                this.log("Kıtlık Başladı: Tahıl stoku kritik seviyede!", "crit");
+            // Ekonomi Simulasyonu
+            // 1. Faiz-Enflasyon ilişkisi: Faiz düşükse enflasyon artar
+            const targetInf = (10 - this.state.rate) * 1.5;
+            this.state.inflation += (targetInf - this.state.inflation) * 0.1;
+
+            // 2. Kur Etkisi: Enflasyon yükseldikçe kur artar
+            this.state.fx += (this.state.inflation / 20) * Math.random();
+
+            // 3. Gelir Gider
+            const revenue = (this.state.factories * 50000) / this.state.fx;
+            const expense = 30000 + (this.state.inflation * 1000);
+            this.state.money += (revenue - expense);
+
+            // 4. Stabilite: Enflasyon %10 üstündeyse düşer
+            if(this.state.inflation > 10) this.state.stability -= 1;
+            else if(this.state.inflation < 5) this.state.stability = Math.min(100, this.state.stability + 1);
+
+            // Geçmiş verileri güncelle
+            this.state.history.inf.push(this.state.inflation.toFixed(1));
+            this.state.history.fx.push(this.state.fx.toFixed(2));
+            if(this.state.history.inf.length > 15) {
+                this.state.history.inf.shift();
+                this.state.history.fx.shift();
             }
 
-            // Rastgele Olay Şansı
-            if(Math.random() > 0.85) this.triggerEvent();
+            this.updateUI();
+            if(Math.random() > 0.9) this.triggerEvent();
+        },
 
+        updateUI() {
+            document.getElementById('ui-money').innerText = (this.state.money / 1000000).toFixed(2) + "M";
+            document.getElementById('ui-fx').innerText = this.state.fx.toFixed(2);
+            document.getElementById('ui-inf').innerText = this.state.inflation.toFixed(1) + "%";
+            document.getElementById('ui-rate').innerText = this.state.rate.toFixed(1) + "%";
+            document.getElementById('ui-stb').innerText = this.state.stability + "%";
+            document.getElementById('ui-unemp').innerText = this.state.unemployment.toFixed(1) + "%";
+
+            const months = ["Oca","Sub","Mar","Nis","May","Haz","Tem","Agu","Eyl","Eki","Kas","Ara"];
+            document.getElementById('game-date').innerText = `1 ${months[this.state.date.getMonth()]} ${this.state.date.getFullYear()}`;
+
+            if(this.chart) this.chart.update();
+        },
+
+        adjustRate(val) {
+            this.state.rate = Math.max(0, this.state.rate + val);
+            this.log(`Faiz oranı %${this.state.rate.toFixed(1)} seviyesine çekildi.`);
             this.updateUI();
         },
 
-        updateUI: function() {
-            document.getElementById('val-money').innerText = (this.data.money / 1000000).toFixed(2) + "M$";
-            document.getElementById('val-steel').innerText = this.data.steel;
-            document.getElementById('val-grain').innerText = this.data.grain;
-            document.getElementById('val-stability').innerText = this.data.stability + "%";
-            document.getElementById('val-stability').style.color = this.data.stability > 70 ? 'var(--success)' : 'var(--danger)';
-            
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
-            document.getElementById('game-date').innerText = this.data.date.toLocaleDateString('tr-TR', options).toUpperCase();
-
-            // Progress barlar
-            document.getElementById('pop-workers').style.width = this.data.pops.workers + "%";
-            document.getElementById('pop-elites').style.width = this.data.pops.elites + "%";
-            document.getElementById('pop-peasants').style.width = this.data.pops.peasants + "%";
-        },
-
-        // --- DEVLET KARARLARI ---
-        enact: function(type) {
-            if(type === 'tax') {
-                this.data.money += 200000;
-                this.data.stability -= 10;
-                this.data.pops.workers -= 5;
-                this.log("Yeni vergi yasası onaylandı. Halk huzursuz.");
-            }
-            if(type === 'conscription') {
-                this.data.stability -= 15;
-                this.data.threat += 20;
-                this.log("Zorunlu askerlik ilan edildi! Komşu devletler teyakkuzda.", "crit");
-            }
-            this.updateUI();
-        },
-
-        build: function() {
-            if(this.data.money >= 300000 && this.data.steel >= 100) {
-                this.data.money -= 300000;
-                this.data.steel -= 100;
-                this.data.factories.steel++;
-                this.log("Yeni Çelik Fabrikası inşa edildi.");
-            } else {
-                this.log("Yetersiz kaynak! (300K$ ve 100 Çelik gerekli)");
-            }
-            this.updateUI();
-        },
-
-        // --- EVENT SYSTEM ---
-        triggerEvent: function() {
-            const events = [
-                {
-                    title: "BÜYÜK BUHRAN",
-                    desc: "Küresel borsalar çöktü. İhracat gelirlerimiz %40 azaldı. Halk panik içinde.",
-                    opts: [
-                        { text: "Bankaları Destekle (-500K$)", f: () => { this.data.money -= 500000; this.data.stability += 5; } },
-                        { text: "Bırak Batsınlar (İstikrar -30)", f: () => { this.data.stability -= 30; } }
-                    ]
-                },
-                {
-                    title: "SINIR İHLALİ",
-                    desc: "Kuzey İmparatorluğu birlikleri silahsız bölgeye giriş yaptı. Bu bir savaş nedeni olabilir.",
-                    opts: [
-                        { text: "Sert Nota Ver (Tehdit +10)", f: () => { this.data.threat += 10; } },
-                        { text: "Savaşa Hazırlan! (Seferberlik başlar)", f: () => { this.enact('conscription'); } }
-                    ]
+        enact(type) {
+            if(type === 'print_money') {
+                this.state.money += 500000;
+                this.state.inflation += 5;
+                this.state.fx += 0.5;
+                this.log("Karşılıksız para basıldı! Enflasyon fırladı.", "crit");
+            } else if(type === 'welfare') {
+                if(this.state.money > 100000) {
+                    this.state.money -= 100000;
+                    this.state.stability += 5;
+                    this.log("Halk yardımları dağıtıldı.");
                 }
+            }
+            this.updateUI();
+        },
+
+        build(type) {
+            const cost = 250000 * this.state.fx;
+            if(this.state.money >= cost) {
+                this.state.money -= cost;
+                this.state.factories++;
+                this.log(`Yeni tesis inşa edildi. Maliyet: $${cost.toFixed(0)}`, "success");
+            } else {
+                this.log("Yetersiz döviz/fon!", "crit");
+            }
+            this.updateUI();
+        },
+
+        log(msg, type="") {
+            const f = document.getElementById('log-feed');
+            const d = document.createElement('div');
+            d.className = `log-entry ${type}`;
+            d.innerText = `> ${msg}`;
+            f.prepend(d);
+            if(f.childNodes.length > 10) f.lastChild.remove();
+        },
+
+        triggerEvent() {
+            const evs = [
+                { t: "BORSA ÇÖKÜŞÜ", d: "Küresel piyasalarda yaşanan panik yerel kuru vurdu.", f: () => { this.state.fx += 0.4; this.state.stability -= 10; } },
+                { t: "TEKNOLOJIK ATILIM", d: "Sanayide verimlilik arttı.", f: () => { this.state.factories += 1; } }
             ];
-
-            const ev = events[Math.floor(Math.random() * events.length)];
-            document.getElementById('modal-title').innerText = ev.title;
-            document.getElementById('modal-content').innerText = ev.desc;
+            const e = evs[Math.floor(Math.random() * evs.length)];
             
-            const optDiv = document.getElementById('modal-options');
-            optDiv.innerHTML = '';
-            ev.opts.forEach(o => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-prime';
-                btn.innerText = o.text;
-                btn.onclick = () => { o.f(); document.getElementById('global-overlay').style.display='none'; this.updateUI(); };
-                optDiv.appendChild(btn);
-            });
-
+            document.getElementById('modal-title').innerText = e.t;
+            document.getElementById('modal-content').innerText = e.d;
+            document.getElementById('modal-options').innerHTML = `<button class="btn-prime" style="width:100%; padding:10px; background:var(--gold); border:none; color:#000; font-weight:bold;" onclick="document.getElementById('global-overlay').style.display='none'">ANLAŞILDI</button>`;
+            e.f();
             document.getElementById('global-overlay').style.display = 'flex';
         },
 
-        log: function(msg, type='') {
-            const feed = document.getElementById('log-feed');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry ' + type;
-            entry.innerText = `> ${msg}`;
-            feed.prepend(entry);
+        setMapMode(m) {
+            this.log(`Harita modu: ${m}`);
+            document.getElementById('map-mode').innerText = m.toUpperCase();
         }
     };
 
+    function varColor(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    window.onload = () => game.init();
+
+    // SERVICE WORKER KAYDI (SİLİNMEDİ)
     if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("./sw.js");
-}
-
-    game.init();
-
+        navigator.serviceWorker.register("./sw.js").then(() => console.log("SW Aktif")).catch(err => console.log("SW Hata", err));
+    }
 </script>
 </body>
 </html>
-
-
-
-
-
