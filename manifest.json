@@ -2,23 +2,23 @@
   "name": "Aeterna",
   "short_name": "Aeterna",
   "description": "Aeterna OS Web Game",
-  "start_url": "https://ardatrnn.github.io/Aeterna/",
-  "scope": "https://ardatrnn.github.io/Aeterna/",
+  "start_url": "/Aeterna/",
+  "scope": "/Aeterna/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "https://ardatrnn.github.io/Aeterna/aaaterna.png",
+      "src": "/Aeterna/aaaterna.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     },
     {
-      "src": "https://ardatrnn.github.io/Aeterna/aeterna.png",
+      "src": "/Aeterna/aeterna.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
