@@ -1,11 +1,10 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
-  "display": "fullscreen",
   "name": "Aeterna",
-  "orientation": "any",
-  "scope": "/Aeterna/",
   "short_name": "Aeterna",
+  "description": "Aeterna OS web game",
   "start_url": "/Aeterna/",
+  "scope": "/Aeterna/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
   "theme_color": "#ffffff"
 }
