@@ -1,11 +1,11 @@
 {
   "background_color": "#ffffff",
   "dir": "ltr",
-  "display": "standalone",
-  "name": "ardatrnn.github",
+  "display": "fullscreen",
+  "name": "Aeterna",
   "orientation": "any",
-  "scope": "/",
-  "short_name": "ardatrnn.github",
+  "scope": "/aeterna/",
+  "short_name": "Aeterna",
   "start_url": "/aeterna/",
   "theme_color": "#ffffff"
 }
