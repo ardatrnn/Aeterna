@@ -4,8 +4,8 @@
   "display": "fullscreen",
   "name": "Aeterna",
   "orientation": "any",
-  "scope": "/aeterna/",
+  "scope": "/Aeterna/",
   "short_name": "Aeterna",
-  "start_url": "/aeterna/",
+  "start_url": "/Aeterna/",
   "theme_color": "#ffffff"
 }
