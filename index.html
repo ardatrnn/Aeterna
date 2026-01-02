@@ -490,10 +490,15 @@
         }
     };
 
+    if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}
+
     game.init();
 
 </script>
 </body>
 </html>
+
 
 
