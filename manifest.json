@@ -1,0 +1,10 @@
+{
+  "name": "Aeterna",
+  "short_name": "Aeterna",
+  "description": "Aeterna OS Web Game",
+  "start_url": "https://ardatrnn.github.io/Aeterna/",
+  "scope": "https://ardatrnn.github.io/Aeterna/",
+  "display": "fullscreen",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
