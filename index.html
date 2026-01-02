@@ -3,541 +3,574 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AETERNA: STATECRAFT | GRAND STRATEGY ENGINE v5.0 (ULTIMATE)</title>
+    <title>AETERNA: OMEGA v7.0 | GRAND STRATEGY & GEOPOLITICS SIMULATOR</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Teko:wght@300;400;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Teko:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
+        /* --- VISUAL CORE (CYBER-COMMAND STYLE) --- */
         :root {
-            --bg-dark: #020202;
-            --bg-panel: #0d1117;
-            --bg-header: #161b22;
+            --bg-deep: #030405;
+            --bg-panel: #0a0e14;
+            --bg-header: #11161d;
+            --overlay: rgba(10, 14, 20, 0.95);
             
-            --cyber-blue: #00f3ff;
-            --cyber-gold: #ffd700;
-            --cyber-red: #ff2a2a;
-            --cyber-green: #0aff0a;
-            --cyber-purple: #bc13fe;
-            --cyber-orange: #ff9100;
+            --c-blue: #00f3ff;
+            --c-gold: #ffd700;
+            --c-red: #ff2a2a;
+            --c-green: #0aff0a;
+            --c-purple: #9d00ff;
+            --c-orange: #ff9100;
+            --c-grey: #5c6370;
             
             --border: 1px solid rgba(255, 255, 255, 0.1);
-            --glass: rgba(13, 17, 23, 0.95);
-            
+            --shadow-glow: 0 0 10px rgba(0, 243, 255, 0.2);
             --font-head: 'Teko', sans-serif;
             --font-ui: 'Rajdhani', sans-serif;
             --font-mono: 'JetBrains Mono', monospace;
         }
 
-        * { box-sizing: border-box; user-select: none; outline: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; }
         
         body {
-            background-color: var(--bg-dark);
-            color: #c9d1d9;
+            background-color: var(--bg-deep);
+            color: #dcdfe4;
             font-family: var(--font-ui);
             margin: 0; height: 100vh; overflow: hidden;
             display: flex; flex-direction: column;
-            background-image: radial-gradient(circle at 50% 50%, #0d1117 0%, #000 100%);
+            background-image: radial-gradient(circle at 50% 50%, #151b24 0%, #000 130%);
         }
 
         /* --- SCROLLBAR --- */
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--cyber-blue); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--c-blue); }
 
-        /* --- TOP BAR --- */
+        /* --- TOP HUD --- */
         #top-hud {
-            height: 50px; background: var(--bg-header); border-bottom: 1px solid #30363d;
-            display: flex; align-items: center; padding: 0 15px; gap: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 100; font-size: 12px;
-        }
-        
-        .hud-group { display: flex; gap: 10px; border-right: 1px solid #30363d; padding-right: 10px; height: 30px; align-items: center; }
-        .metric-box { display: flex; flex-direction: column; min-width: 50px; cursor: help; }
-        .metric-val { font-family: var(--font-mono); font-weight: bold; color: #fff; font-size: 13px; }
-        .metric-lbl { font-size: 9px; color: #8b949e; letter-spacing: 0.5px; text-transform: uppercase; }
-        
-        .res-icon { margin-right: 3px; width:12px; display:inline-block; text-align:center; }
-        
-        .defcon-box { 
-            font-family: var(--font-head); font-size: 20px; padding: 2px 10px; 
-            border: 1px solid var(--cyber-red); color: var(--cyber-red);
-            text-shadow: 0 0 5px var(--cyber-red); cursor: pointer;
-            animation: pulse-slow 3s infinite; border-radius: 4px;
+            height: 60px; background: var(--bg-header); border-bottom: var(--border);
+            display: flex; align-items: center; padding: 0 20px; gap: 20px;
+            box-shadow: 0 5px 20px #000; z-index: 100;
         }
 
+        .hud-logo { 
+            font-family: var(--font-head); font-size: 32px; color: #fff; 
+            letter-spacing: 2px; margin-right: 10px; 
+            text-shadow: 0 0 15px var(--c-blue);
+        }
+
+        .metric-group { display: flex; gap: 15px; border-right: 1px solid #333; padding-right: 15px; height: 40px; align-items: center; }
+        
+        .metric { display: flex; flex-direction: column; min-width: 70px; cursor: help; position: relative; }
+        .metric-val { font-family: var(--font-mono); font-weight: 700; color: #fff; font-size: 15px; line-height: 1; }
+        .metric-lbl { font-size: 10px; color: var(--c-grey); font-weight: 600; text-transform: uppercase; margin-top: 3px; }
+        .metric-icon { margin-right: 4px; color: var(--c-blue); font-size: 10px; }
+        
+        .defcon-panel {
+            font-family: var(--font-head); font-size: 24px; padding: 2px 20px;
+            border: 2px solid var(--c-red); color: var(--c-red); background: rgba(50,0,0,0.4);
+            text-shadow: 0 0 10px var(--c-red); border-radius: 4px; cursor: pointer;
+            transition: 0.3s; animation: pulse 3s infinite;
+        }
+        .defcon-panel:hover { background: var(--c-red); color: #000; }
+
+        .date-display { text-align: right; font-family: var(--font-mono); }
+        .date-main { color: var(--c-gold); font-size: 16px; font-weight: bold; }
+        
         /* --- MAIN LAYOUT --- */
         #viewport {
             flex: 1; display: grid; 
-            grid-template-columns: 320px 1fr 320px;
-            overflow: hidden; gap: 1px; background: #21262d;
+            grid-template-columns: 360px 1fr 360px;
+            overflow: hidden; gap: 1px; background: #222;
         }
 
         .panel { background: var(--bg-panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
         /* TABS */
-        .nav-tabs { display: flex; background: #010409; height: 35px; border-bottom: var(--border); overflow-x: auto; }
-        .nav-btn {
-            flex: 1; min-width: 60px; background: transparent; border: none; color: #8b949e;
-            font-family: var(--font-head); font-size: 16px; letter-spacing: 0.5px;
-            cursor: pointer; transition: 0.2s; border-bottom: 2px solid transparent; white-space: nowrap; padding: 0 10px;
+        .tabs { display: flex; background: #05070a; border-bottom: var(--border); overflow-x: auto; }
+        .tab-btn {
+            flex: 1; background: transparent; border: none; color: #888; min-width: 60px;
+            font-family: var(--font-head); font-size: 18px; height: 45px;
+            cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent;
         }
-        .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-btn.active { color: var(--cyber-blue); border-bottom-color: var(--cyber-blue); background: rgba(0, 243, 255, 0.05); }
+        .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .tab-btn.active { color: var(--c-blue); border-bottom-color: var(--c-blue); background: rgba(0, 243, 255, 0.05); }
 
         .content-area { padding: 10px; overflow-y: auto; flex: 1; display: none; }
-        .content-area.active { display: block; animation: fadeIn 0.2s; }
+        .content-area.active { display: block; animation: fadeIn 0.3s ease-out; }
 
-        /* WIDGETS */
+        /* CARDS & WIDGETS */
         .card { 
-            background: rgba(255,255,255,0.02); border: 1px solid #30363d; 
-            padding: 10px; margin-bottom: 8px; border-radius: 6px; 
+            background: rgba(255,255,255,0.02); border: var(--border); 
+            padding: 12px; margin-bottom: 10px; border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-        .card-head { 
-            font-size: 11px; font-weight: bold; color: var(--cyber-gold); 
-            margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;
-            display: flex; justify-content: space-between; border-bottom: 1px solid #30363d; padding-bottom: 3px;
+        .card-header { 
+            font-size: 12px; font-weight: 700; color: var(--c-gold); 
+            margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;
+            display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 5px;
         }
 
-        .row-kv { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; font-family: var(--font-mono); align-items: center; }
-        .bar-cont { height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; margin: 3px 0 6px 0; }
-        .bar-fill { height: 100%; transition: width 0.5s; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; align-items: center; }
+        .stat-val { font-family: var(--font-mono); color: #fff; }
+
+        .progress-bar { height: 6px; background: #1a1f26; border-radius: 3px; overflow: hidden; margin: 4px 0 8px 0; }
+        .progress-fill { height: 100%; transition: width 0.5s; }
 
         /* BUTTONS */
-        .btn-main {
-            width: 100%; padding: 8px; background: linear-gradient(90deg, #161b22, #21262d);
-            border: 1px solid #30363d; color: #c9d1d9; text-align: left;
-            font-family: var(--font-ui); font-size: 13px; cursor: pointer; border-radius: 4px;
-            margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;
+        .btn {
+            width: 100%; padding: 8px 12px; background: linear-gradient(90deg, #151a21, #1e242e);
+            border: 1px solid #333; color: #ccc; text-align: left;
+            font-family: var(--font-ui); font-size: 14px; cursor: pointer; border-radius: 4px;
+            margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;
+            transition: all 0.2s; position: relative; overflow: hidden;
         }
-        .btn-main:hover { border-color: var(--cyber-blue); color: #fff; padding-left: 12px; }
-        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; border-color: #30363d; }
-        .btn-danger { border-color: #551111; color: #ffadad; }
-        .btn-danger:hover { border-color: var(--cyber-red); background: rgba(255,42,42,0.1); }
+        .btn::after { content:''; position: absolute; left:0; bottom:0; height:2px; width:0%; background: var(--c-blue); transition: width 0.3s; }
+        .btn:hover:not(:disabled) { border-color: var(--c-blue); color: #fff; background: #232b36; }
+        .btn:hover::after { width: 100%; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        
+        .btn-danger { border-left: 3px solid var(--c-red); }
+        .btn-danger:hover { border-color: var(--c-red); background: rgba(50,10,10,0.5); }
+        
+        .btn-tag { font-size: 10px; font-family: var(--font-mono); padding: 2px 5px; border-radius: 3px; background: #000; border: 1px solid #444; }
 
-        .cost-tag { font-size: 10px; font-family: var(--font-mono); color: #8b949e; background: #0d1117; padding: 2px 4px; border-radius: 3px; }
-
-        /* MAP AREA */
-        #map-wrapper { position: relative; background: #050505; overflow: hidden; }
+        /* MAP & CANVAS */
+        #map-wrapper { position: relative; background: #020202; overflow: hidden; box-shadow: inset 0 0 100px #000; }
         #map-canvas { display: block; width: 100%; height: 100%; cursor: crosshair; }
         
-        #map-ui { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .map-mode { 
-            background: rgba(0,0,0,0.8); color: #aaa; border: 1px solid #30363d; padding: 5px 10px; 
-            font-size: 10px; cursor: pointer; backdrop-filter: blur(4px); font-weight: bold; border-radius: 4px;
+        #map-hud { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .map-filter { 
+            background: rgba(0,0,0,0.8); color: #aaa; border: 1px solid #444; padding: 8px 12px; 
+            font-size: 11px; cursor: pointer; backdrop-filter: blur(5px); font-weight: 700;
+            text-transform: uppercase; width: 120px; text-align: center; border-radius: 2px;
+            transition: 0.2s;
         }
-        .map-mode.active { border-color: var(--cyber-blue); color: var(--cyber-blue); box-shadow: 0 0 10px rgba(0,243,255,0.1); }
+        .map-filter:hover, .map-filter.active { border-color: var(--c-blue); color: var(--c-blue); box-shadow: 0 0 15px rgba(0, 243, 255, 0.15); }
 
-        #province-detail {
-            position: absolute; bottom: 10px; right: 10px; width: 280px;
-            background: rgba(13, 17, 23, 0.95); border: 1px solid var(--cyber-blue);
-            padding: 10px; backdrop-filter: blur(10px); display: none; border-radius: 6px;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8); z-index: 50;
+        #province-tooltip {
+            position: absolute; bottom: 20px; right: 20px; width: 300px;
+            background: var(--overlay); border: 1px solid var(--c-blue);
+            padding: 15px; backdrop-filter: blur(10px); display: none; border-radius: 4px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); z-index: 50; animation: slideUp 0.3s;
         }
 
-        /* TICKER */
-        #news-ticker {
-            height: 24px; background: var(--cyber-gold); color: #000;
+        /* NEWS TICKER */
+        #ticker-bar {
+            height: 30px; background: var(--c-gold); color: #000;
             display: flex; align-items: center; overflow: hidden; white-space: nowrap;
-            font-family: var(--font-mono); font-weight: bold; font-size: 12px;
-            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 200;
+            font-family: var(--font-mono); font-weight: 800; font-size: 14px;
+            position: fixed; bottom: 0; left: 0; width: 100%; z-index: 200; border-top: 2px solid #000;
         }
+        .ticker-item { margin-right: 50px; display: inline-block; }
 
         /* MODALS */
-        .modal-overlay {
+        .modal-bg {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
         }
-        .modal-window {
-            width: 600px; max-height: 85vh; background: #0d1117; border: 1px solid #30363d;
-            display: flex; flex-direction: column; box-shadow: 0 0 50px rgba(0,0,0,0.8); border-radius: 8px;
+        .modal {
+            width: 700px; max-height: 90vh; background: #0d1117; border: 1px solid #333;
+            display: flex; flex-direction: column; box-shadow: 0 0 100px rgba(0,0,0,0.8); border-radius: 6px;
+            animation: zoomIn 0.2s;
         }
-        .mw-header { background: #161b22; padding: 12px; font-family: var(--font-head); font-size: 20px; color: #fff; border-bottom: 1px solid #30363d; display:flex; justify-content:space-between; }
-        .mw-body { padding: 15px; overflow-y: auto; color: #c9d1d9; line-height: 1.5; font-size: 13px; }
-        .mw-footer { padding: 12px; border-top: 1px solid #30363d; display: flex; justify-content: flex-end; gap: 10px; background: #161b22; }
+        .modal-head { background: #161b22; padding: 15px 20px; font-family: var(--font-head); font-size: 26px; color: #fff; border-bottom: 1px solid #333; display:flex; justify-content:space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; font-size: 14px; }
+        .modal-foot { padding: 15px; border-top: 1px solid #333; display: flex; justify-content: flex-end; gap: 10px; background: #161b22; }
 
-        .tag-diplo { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 5px; }
-        .tag-ally { background: rgba(10, 255, 10, 0.1); color: var(--cyber-green); border: 1px solid var(--cyber-green); }
-        .tag-enemy { background: rgba(255, 42, 42, 0.1); color: var(--cyber-red); border: 1px solid var(--cyber-red); }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes scroll { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* ANIMATIONS */
-        @keyframes pulse-slow { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
+<!-- TOP HUD -->
 <div id="top-hud">
-    <div style="font-family: var(--font-head); font-size: 24px; color: #fff; letter-spacing: 2px; margin-right: 20px;">
-        AETERNA <span style="color:var(--cyber-blue)">OMEGA</span> <span style="font-size:12px; color:#666">v5.0</span>
-    </div>
+    <div class="hud-logo">AETERNA <span style="color:var(--c-blue)">OMEGA</span> <span style="font-size:12px; color:#666">v7.0</span></div>
 
-    <div class="hud-group">
-        <div class="metric-box" title="Hazine (Nakit)">
-            <span class="metric-val" id="hud-money">$0M</span>
-            <span class="metric-lbl"><i class="fa-solid fa-sack-dollar res-icon"></i>HZN</span>
+    <div class="metric-group">
+        <div class="metric" title="Hazine (Nakit Akışı)">
+            <span class="metric-val" id="val-money">$0 M</span>
+            <span class="metric-lbl"><i class="fa-solid fa-sack-dollar metric-icon"></i> HAZİNE</span>
         </div>
-        <div class="metric-box" title="Politik Güç">
-            <span class="metric-val" id="hud-pp" style="color:var(--cyber-gold)">0</span>
-            <span class="metric-lbl"><i class="fa-solid fa-landmark res-icon"></i>PP</span>
+        <div class="metric" title="Politik Güç (PP)">
+            <span class="metric-val" id="val-pp" style="color:var(--c-gold)">0</span>
+            <span class="metric-lbl"><i class="fa-solid fa-crown metric-icon"></i> GÜÇ</span>
         </div>
-        <div class="metric-box" title="İstihbarat Ağı">
-            <span class="metric-val" id="hud-intel" style="color:var(--cyber-purple)">0</span>
-            <span class="metric-lbl"><i class="fa-solid fa-eye res-icon"></i>INT</span>
-        </div>
-    </div>
-
-    <div class="hud-group">
-        <div class="metric-box" title="Enerji Rezervi">
-            <span class="metric-val" id="hud-energy" style="color:var(--cyber-blue)">0%</span>
-            <span class="metric-lbl"><i class="fa-solid fa-bolt res-icon"></i>ENJ</span>
-        </div>
-        <div class="metric-box" title="Petrol Rezervi">
-            <span class="metric-val" id="hud-oil" style="color:#aaa">0k</span>
-            <span class="metric-lbl"><i class="fa-solid fa-oil-well res-icon"></i>PET</span>
-        </div>
-        <div class="metric-box" title="İstikrar">
-            <span class="metric-val" id="hud-stab">0%</span>
-            <span class="metric-lbl"><i class="fa-solid fa-scale-balanced res-icon"></i>İST</span>
+        <div class="metric" title="Uluslararası Prestij">
+            <span class="metric-val" id="val-pres" style="color:var(--c-purple)">0</span>
+            <span class="metric-lbl"><i class="fa-solid fa-star metric-icon"></i> PRESTİJ</span>
         </div>
     </div>
 
-    <div class="hud-group" style="flex:1; justify-content:center;">
-        <div class="defcon-box" onclick="game.toggleDefcon()" id="defcon-disp">DEFCON 5</div>
+    <div class="metric-group">
+        <div class="metric">
+            <span class="metric-val" id="val-fuel" style="color:#aaa">0</span>
+            <span class="metric-lbl"><i class="fa-solid fa-gas-pump metric-icon"></i> YAKIT</span>
+        </div>
+        <div class="metric">
+            <span class="metric-val" id="val-ammo" style="color:var(--c-orange)">0</span>
+            <span class="metric-lbl"><i class="fa-solid fa-box metric-icon"></i> MÜHİMMAT</span>
+        </div>
+        <div class="metric">
+            <span class="metric-val" id="val-stab" style="color:var(--c-green)">0%</span>
+            <span class="metric-lbl"><i class="fa-solid fa-scale-balanced metric-icon"></i> İSTİKRAR</span>
+        </div>
     </div>
 
-    <div class="game-clock">
-        <div id="date-display" style="font-weight:bold; color:var(--cyber-gold)">01 OCAK 2025</div>
-        <div style="font-size:10px; color:#666; cursor:pointer; text-align:right;" onclick="game.togglePause()">[ SPACE: DURDUR ]</div>
+    <div style="flex:1; display:flex; justify-content:center;">
+        <div class="defcon-panel" id="defcon-disp" onclick="game.mil.toggleDefcon()">DEFCON 5</div>
+    </div>
+
+    <div class="date-display">
+        <div class="date-main" id="date-main">01 OCAK 2026</div>
+        <div style="font-size:10px; color:#666; cursor:pointer;" onclick="game.togglePause()" id="pause-status">[ SPACE: DURDUR ]</div>
     </div>
 </div>
 
+<!-- VIEWPORT -->
 <div id="viewport">
     
+    <!-- LEFT: STATECRAFT -->
     <div class="panel">
-        <div class="nav-tabs">
-            <button class="nav-btn active" onclick="ui.tab('l', 'dash')"><i class="fa-solid fa-building-columns"></i></button>
-            <button class="nav-btn" onclick="ui.tab('l', 'eco')"><i class="fa-solid fa-chart-line"></i></button>
-            <button class="nav-btn" onclick="ui.tab('l', 'soc')"><i class="fa-solid fa-users"></i></button>
-            <button class="nav-btn" onclick="ui.tab('l', 'res')"><i class="fa-solid fa-flask"></i></button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="ui.tab('l', 'pol')"><i class="fa-solid fa-landmark"></i></button>
+            <button class="tab-btn" onclick="ui.tab('l', 'eco')"><i class="fa-solid fa-chart-line"></i></button>
+            <button class="tab-btn" onclick="ui.tab('l', 'soc')"><i class="fa-solid fa-users"></i></button>
+            <button class="tab-btn" onclick="ui.tab('l', 'res')"><i class="fa-solid fa-flask"></i></button>
         </div>
 
-        <div id="tab-l-dash" class="content-area active">
+        <!-- POLITICS -->
+        <div id="tab-l-pol" class="content-area active">
             <div class="card">
-                <div class="card-head">DEVLET YÖNETİMİ</div>
-                <div class="row-kv"><span>Lider:</span> <span style="color:var(--cyber-blue)">Başkan [OYUNCU]</span></div>
-                <div class="row-kv"><span>İdeoloji:</span> <span>Teknokratik Milliyetçilik</span></div>
-                <div class="row-kv"><span>Hükümet Desteği:</span> <span id="gov-support">55%</span></div>
-                <div class="bar-cont"><div class="bar-fill" id="bar-support" style="width:55%; background:var(--cyber-green)"></div></div>
+                <div class="card-header">DEVLET YÖNETİMİ</div>
+                <div class="stat-row"><span>Lider:</span> <span style="color:var(--c-blue)">Başkan [OYUNCU]</span></div>
+                <div class="stat-row"><span>İdeoloji:</span> <span>Teknokratik Otoriter</span></div>
+                <div class="stat-row"><span>Parlamento Desteği:</span> <span id="pol-parl">55%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-parl" style="width:55%; background:var(--c-green)"></div></div>
             </div>
 
             <div class="card">
-                <div class="card-head">ACİL DURUM YASALARI</div>
-                <button class="btn-main" onclick="game.action('law_martial')">
-                    <span><i class="fa-solid fa-person-military-pointing"></i> Sıkıyönetim İlanı</span> <span class="cost-tag">150 PP</span>
+                <div class="card-header">SİYASİ AKSİYONLAR</div>
+                <button class="btn" onclick="game.pol.action('election')">
+                    <span><i class="fa-solid fa-check-to-slot"></i> Erken Seçim</span> <span class="btn-tag">500 PP</span>
                 </button>
-                <button class="btn-main" onclick="game.action('law_censorship')">
-                    <span><i class="fa-solid fa-eye-slash"></i> Medya Sansürü</span> <span class="cost-tag">50 PP</span>
+                <button class="btn" onclick="game.pol.action('purge')">
+                    <span><i class="fa-solid fa-skull"></i> Parti İçi Temizlik</span> <span class="btn-tag">100 PP / -Hukuk</span>
                 </button>
-                <button class="btn-main" onclick="game.action('law_election')">
-                    <span><i class="fa-solid fa-box-archive"></i> Erken Seçim</span> <span class="cost-tag">Riskli</span>
+                <button class="btn" onclick="game.pol.action('referendum')">
+                    <span><i class="fa-solid fa-scroll"></i> Anayasa Referandumu</span> <span class="btn-tag">250 PP</span>
+                </button>
+                <button class="btn btn-danger" onclick="game.pol.action('martial')">
+                    <span><i class="fa-solid fa-person-military-pointing"></i> Sıkıyönetim İlanı</span> <span class="btn-tag">1000 PP</span>
                 </button>
             </div>
-            
+
             <div class="card">
-                <div class="card-head">MECLİS DAĞILIMI</div>
-                <canvas id="parliament-chart" height="150"></canvas>
+                <div class="card-header">ULUSLARARASI KURUMLAR</div>
+                <div class="stat-row"><span>BM Güvenlik Konseyi:</span> <span>Üye Değil</span></div>
+                <div class="stat-row"><span>NATO Durumu:</span> <span style="color:var(--c-blue)">Müttefik</span></div>
+                <button class="btn" onclick="game.pol.unVote()">
+                    <span>BM Oylamasına Katıl</span> <span class="btn-tag">Prestij</span>
+                </button>
             </div>
         </div>
 
+        <!-- ECONOMY -->
         <div id="tab-l-eco" class="content-area">
             <div class="card">
-                <div class="card-head">MAKROEKONOMİ</div>
-                <div class="row-kv"><span>GSYİH (GDP):</span> <span id="eco-gdp">$900B</span></div>
-                <div class="row-kv"><span>Büyüme:</span> <span id="eco-growth" style="color:var(--cyber-green)">+3.2%</span></div>
-                <div class="row-kv"><span>Enflasyon:</span> <span id="eco-inf" style="color:var(--cyber-red)">12.5%</span></div>
-                <div class="row-kv"><span>Dış Borç:</span> <span id="eco-debt">$350B</span></div>
+                <div class="card-header">MAKROEKONOMİ & BORSA</div>
+                <div class="stat-row"><span>GSYİH:</span> <span id="eco-gdp">$950B</span></div>
+                <div class="stat-row"><span>Enflasyon:</span> <span id="eco-inf" style="color:var(--c-red)">12.5%</span></div>
+                <div class="stat-row"><span>Dış Borç:</span> <span id="eco-debt">$320B</span></div>
+                <button class="btn" onclick="game.eco.lunder()">
+                    <span><i class="fa-solid fa-money-bill-transfer"></i> Kara Para Aklama</span> <span class="btn-tag">+$2B / Riskli</span>
+                </button>
             </div>
 
             <div class="card">
-                <div class="card-head">KÜRESEL TİCARET</div>
-                <div style="font-size:11px; color:#888; margin-bottom:5px;">İthalat/İhracat Dengesi</div>
-                <button class="btn-main" onclick="game.trade('buy_oil')">
-                    <span>Petrol İthal Et (1000 varil)</span> <span class="cost-tag">-$50M</span>
+                <div class="card-header">KAYNAK YÖNETİMİ</div>
+                <button class="btn" onclick="game.eco.buy('oil')">
+                    <span>Petrol İthalatı (1000 varil)</span> <span class="btn-tag">-$50M</span>
                 </button>
-                <button class="btn-main" onclick="game.trade('buy_tech')">
-                    <span>Çip Tedariği</span> <span class="cost-tag">-$100M</span>
+                <button class="btn" onclick="game.eco.buy('rare')">
+                    <span>Nadir Element Al</span> <span class="btn-tag">-$100M</span>
                 </button>
-                <button class="btn-main btn-danger" onclick="game.trade('debt_imf')">
-                    <span>IMF Acil Kredi</span> <span class="cost-tag">+$10B / +Bağımlılık</span>
+                <button class="btn" onclick="game.eco.build('fac')">
+                    <span>Yeni Fabrika İnşa Et</span> <span class="btn-tag">-$500M</span>
+                </button>
+                <button class="btn" onclick="game.eco.energy('nuc')">
+                    <span>Nükleer Santral Yatırımı</span> <span class="btn-tag">-$5B</span>
                 </button>
             </div>
         </div>
 
+        <!-- SOCIETY -->
         <div id="tab-l-soc" class="content-area">
             <div class="card">
-                <div class="card-head">TOPLUMSAL DİNAMİKLER</div>
-                <div class="row-kv"><span>Sivil Huzursuzluk:</span> <span id="soc-unrest" style="color:var(--cyber-orange)">Orta (%40)</span></div>
-                <div class="row-kv"><span>Terör Riski:</span> <span id="soc-terror" style="color:var(--cyber-red)">Yüksek</span></div>
-                <div class="bar-cont"><div class="bar-fill" id="bar-terror" style="width:70%; background:var(--cyber-red)"></div></div>
+                <div class="card-header">İÇ GÜVENLİK & TOPLUM</div>
+                <div class="stat-row"><span>Halk Mutluluğu:</span> <span id="soc-hap">45%</span></div>
+                <div class="stat-row"><span>Terör Riski:</span> <span id="soc-ter" style="color:var(--c-red)">YÜKSEK</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-ter" style="width:75%; background:var(--c-red)"></div></div>
             </div>
             
             <div class="card">
-                <div class="card-head">MEDYA VE PROPAGANDA</div>
-                <button class="btn-main" onclick="game.action('prop_national')">
-                    <span>Ulusa Sesleniş (Milliyetçi)</span> <span class="cost-tag">20 PP</span>
+                <div class="card-header">MEDYA & İSTİHBARAT</div>
+                <button class="btn" onclick="game.soc.propaganda()">
+                    <span><i class="fa-solid fa-bullhorn"></i> Ulusal Propaganda</span> <span class="btn-tag">Medya</span>
                 </button>
-                <button class="btn-main" onclick="game.action('prop_fear')">
-                    <span>Tehdit Algısı Yarat (Korku)</span> <span class="cost-tag">30 PP</span>
+                <button class="btn" onclick="game.soc.raid()">
+                    <span><i class="fa-solid fa-handcuffs"></i> Terör Operasyonu</span> <span class="btn-tag">Polis</span>
                 </button>
-                <button class="btn-main" onclick="game.action('int_raid')">
-                    <span>Hücre Evlerine Baskın</span> <span class="cost-tag">Güvenlik</span>
+                <button class="btn" onclick="game.soc.censorship()">
+                    <span><i class="fa-solid fa-eye-slash"></i> Sosyal Medya Kısıtlaması</span> <span class="btn-tag">Otorite</span>
                 </button>
             </div>
         </div>
 
+        <!-- RESEARCH -->
         <div id="tab-l-res" class="content-area">
             <div class="card">
-                <div class="card-head">AR-GE MERKEZİ</div>
-                <div style="text-align:center; color:var(--cyber-blue); font-size:20px; font-weight:bold; margin:5px;" id="val-tech">0.0 RP</div>
-                <div id="tech-tree"></div>
+                <div class="card-header">AR-GE MERKEZİ</div>
+                <div style="text-align:center; font-size:24px; color:var(--c-blue); margin:10px;">
+                    RP: <span id="val-rp">0.0</span>
+                </div>
+                <div id="tech-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- CENTER: MAP -->
     <div class="panel" id="map-wrapper">
         <canvas id="map-canvas"></canvas>
         
-        <div id="map-ui">
-            <button class="map-mode active" onclick="map.setMode('pol')">SİYASİ</button>
-            <button class="map-mode" onclick="map.setMode('mil')">ASKERİ CEPHE</button>
-            <button class="map-mode" onclick="map.setMode('eco')">KAYNAK</button>
-            <button class="map-mode" onclick="map.setMode('intel')">İSTİHBARAT</button>
+        <div id="map-hud">
+            <button class="map-filter active" onclick="map.mode='pol'">POLİTİK</button>
+            <button class="map-filter" onclick="map.mode='mil'">ASKERİ CEPHE</button>
+            <button class="map-filter" onclick="map.mode='eco'">KAYNAK</button>
+            <button class="map-filter" onclick="map.mode='spy'">İSTİHBARAT AĞI</button>
         </div>
 
-        <div id="province-detail">
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:5px;">
-                <span id="pd-name" style="font-family:var(--font-head); font-size:22px; color:var(--cyber-blue)">BÖLGE</span>
-                <span id="pd-flag" style="font-size:18px;">🇹🇷</span>
+        <div id="province-tooltip">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <span id="p-name" style="font-size:20px; font-weight:700; color:var(--c-blue)">BÖLGE</span>
+                <span id="p-owner">Biz</span>
             </div>
+            <div class="stat-row"><span>Sadakat:</span> <span id="p-loy">100%</span></div>
+            <div class="stat-row"><span>Altyapı:</span> <span id="p-inf">100%</span></div>
+            <div class="stat-row"><span>Direniş:</span> <span id="p-risk" style="color:var(--c-red)">0%</span></div>
             
-            <div class="row-kv"><span>Kontrol:</span> <span id="pd-owner">Biz</span></div>
-            <div class="row-kv"><span>Altyapı:</span> <span id="pd-infra">100%</span></div>
-            <div class="row-kv"><span>Nüfus Sadakati:</span> <span id="pd-loyalty">90%</span></div>
-            <div class="row-kv"><span>Direniş Gücü:</span> <span id="pd-risk" style="color:var(--cyber-red)">0%</span></div>
-            
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:4px; margin-top:8px;">
-                <button class="btn-main" style="font-size:10px;" onclick="game.provAction('invest')">YATIRIM ($100)</button>
-                <button class="btn-main" style="font-size:10px;" onclick="game.provAction('fortify')">GÜÇLENDİR (ENG)</button>
-                <button class="btn-main btn-danger" style="font-size:10px;" onclick="game.provAction('suppress')">BASKILA (ORDU)</button>
-                <button class="btn-main" style="font-size:10px;" onclick="game.provAction('nuke')" id="btn-nuke" disabled>☢️ NÜKLEER</button>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">
+                <button class="btn btn-tag" onclick="game.mapAct('invest')">YATIRIM ($100)</button>
+                <button class="btn btn-tag" onclick="game.mapAct('fort')">SAVUNMA</button>
+                <button class="btn btn-tag btn-danger" onclick="game.mapAct('suppress')">BASKIN</button>
+                <button class="btn btn-tag btn-danger" onclick="game.mapAct('nuke')" id="btn-nuke" disabled>☢️ ATOM</button>
             </div>
         </div>
     </div>
 
+    <!-- RIGHT: WAR & DIPLOMACY -->
     <div class="panel">
-        <div class="nav-tabs">
-            <button class="nav-btn active" onclick="ui.tab('r', 'mil')"><i class="fa-solid fa-jet-fighter"></i></button>
-            <button class="nav-btn" onclick="ui.tab('r', 'dip')"><i class="fa-solid fa-globe"></i></button>
-            <button class="nav-btn" onclick="ui.tab('r', 'intel')"><i class="fa-solid fa-user-secret"></i></button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="ui.tab('r', 'mil')"><i class="fa-solid fa-jet-fighter"></i></button>
+            <button class="tab-btn" onclick="ui.tab('r', 'dip')"><i class="fa-solid fa-globe"></i></button>
+            <button class="tab-btn" onclick="ui.tab('r', 'spy')"><i class="fa-solid fa-user-secret"></i></button>
         </div>
 
+        <!-- MILITARY -->
         <div id="tab-r-mil" class="content-area active">
             <div class="card">
-                <div class="card-head">GENELKURMAY</div>
-                <div class="row-kv"><span>İnsan Gücü:</span> <span id="mil-man">1.2M</span></div>
-                <div class="row-kv"><span>Lojistik Ağı:</span> <span id="mil-log" style="color:var(--cyber-orange)">%85</span></div>
-                <div class="row-kv"><span>Savaş Yorgunluğu:</span> <span id="mil-fat">%0</span></div>
+                <div class="card-header">GENELKURMAY</div>
+                <div class="stat-row"><span>İnsan Gücü:</span> <span id="mil-man">1.2M</span></div>
+                <div class="stat-row"><span>Lojistik Ağı:</span> <span id="mil-log" style="color:var(--c-orange)">%90</span></div>
+                <div class="stat-row"><span>Savaş Yorgunluğu:</span> <span id="mil-fat">%0</span></div>
+                
+                <div class="stat-row" style="margin-top:10px;">
+                    <select id="mil-doc" style="width:100%; background:#111; color:#fff; padding:5px; border:1px solid #444;" onchange="game.mil.setDoctrine(this.value)">
+                        <option value="def">Tam Savunma (Defans +%20)</option>
+                        <option value="blitz">Yıldırım Harbi (Hız +%30)</option>
+                        <option value="guerilla">Asimetrik Harp (Düşük Maliyet)</option>
+                        <option value="shock">Şok ve Dehşet (Hava +%50)</option>
+                    </select>
+                </div>
             </div>
 
             <div class="card">
-                <div class="card-head">ENVANTER & ÜRETİM</div>
-                <div class="row-kv"><i class="fa-solid fa-person-rifle"></i> Piyade <span id="cnt-inf">0</span> <button class="cost-tag" onclick="game.recruit('inf')">+KUR</button></div>
-                <div class="row-kv"><i class="fa-solid fa-tank"></i> Tank <span id="cnt-tank">0</span> <button class="cost-tag" onclick="game.recruit('tank')">+KUR</button></div>
-                <div class="row-kv"><i class="fa-solid fa-jet-fighter"></i> Jet <span id="cnt-jet">0</span> <button class="cost-tag" onclick="game.recruit('jet')">+KUR</button></div>
-                <div class="row-kv"><i class="fa-solid fa-ship"></i> Donanma <span id="cnt-ship">0</span> <button class="cost-tag" onclick="game.recruit('ship')">+KUR</button></div>
-                <div class="row-kv"><i class="fa-solid fa-robot"></i> SİHA <span id="cnt-drone">0</span> <button class="cost-tag" onclick="game.recruit('drone')">+KUR</button></div>
+                <div class="card-header">ENVANTER & ÜRETİM</div>
+                <div class="stat-row"><i class="fa-solid fa-person-rifle"></i> Piyade <span id="u-inf">0</span> <button class="btn-tag" onclick="game.mil.train('inf')">+EĞİT</button></div>
+                <div class="stat-row"><i class="fa-solid fa-tank"></i> Zırhlı <span id="u-tank">0</span> <button class="btn-tag" onclick="game.mil.train('tank')">+ÜRET</button></div>
+                <div class="stat-row"><i class="fa-solid fa-jet-fighter"></i> Hava K. <span id="u-air">0</span> <button class="btn-tag" onclick="game.mil.train('air')">+ÜRET</button></div>
+                <div class="stat-row"><i class="fa-solid fa-ship"></i> Donanma <span id="u-sea">0</span> <button class="btn-tag" onclick="game.mil.train('sea')">+İNŞA</button></div>
+                <div class="stat-row"><i class="fa-solid fa-robot"></i> AI/Drone <span id="u-drone">0</span> <button class="btn-tag" onclick="game.mil.train('drone')">+ÜRET</button></div>
+                <div class="stat-row"><i class="fa-solid fa-satellite"></i> Uzay K. <span id="u-space">0</span> <button class="btn-tag" onclick="game.mil.train('space')">+FIRLAT</button></div>
             </div>
-
-            <div class="card">
-                <div class="card-head">STRATEJİK DOKTRİN</div>
-                <select id="mil-doc" style="width:100%; background:#000; color:#fff; border:1px solid #333; padding:5px;" onchange="game.setDoctrine(this.value)">
-                    <option value="def">Tam Savunma (Defans +%20)</option>
-                    <option value="blitz">Yıldırım Harbi (Hız +%30)</option>
-                    <option value="guerilla">Gerilla Harbi (Yıpratma)</option>
-                    <option value="shock">Şok ve Dehşet (Hava +%50)</option>
-                </select>
+            
+             <div class="card">
+                <div class="card-header">SİBER HARP</div>
+                <button class="btn" onclick="game.mil.cyberAttack()">
+                     <span><i class="fa-solid fa-wifi"></i> Düşman Radarını Kör Et</span> <span class="btn-tag">100 INT</span>
+                </button>
             </div>
         </div>
 
+        <!-- DIPLOMACY -->
         <div id="tab-r-dip" class="content-area">
             <div class="card">
-                <div class="card-head">ULUSLARARASI İLİŞKİLER</div>
-                <div id="diplo-list"></div>
+                <div class="card-header">DÜNYA ULUSLARI</div>
+                <div id="dip-list"></div>
             </div>
-            <div class="card" id="diplo-actions" style="display:none">
-                <div class="card-head" id="da-title">ÜLKE ADI</div>
-                <button class="btn-main" onclick="game.diploAction('improve')">İlişkileri Geliştir (50 PP)</button>
-                <button class="btn-main" onclick="game.diploAction('alliance')">İttifak Teklif Et</button>
-                <button class="btn-main" onclick="game.diploAction('trade_deal')">Ticaret Anlaşması</button>
-                <button class="btn-main btn-danger" onclick="game.diploAction('embargo')">Ambargo Uygula</button>
-                <button class="btn-main btn-danger" onclick="game.diploAction('war')">SAVAŞ İLAN ET</button>
+
+            <div id="dip-actions" style="display:none;" class="card">
+                <div class="card-header" id="dip-target">HEDEF ÜLKE</div>
+                <button class="btn" onclick="game.dip.act('improve')">İlişkileri Geliştir</button>
+                <button class="btn" onclick="game.dip.act('trade')">Ticaret Anlaşması</button>
+                <button class="btn" onclick="game.dip.act('alliance')">İttifak Teklif Et</button>
+                <button class="btn btn-danger" onclick="game.dip.act('embargo')">Ambargo Uygula</button>
+                <button class="btn btn-danger" onclick="game.dip.act('sanction')">Ekonomik Yaptırım</button>
+                <button class="btn btn-danger" onclick="game.dip.act('war')">SAVAŞ İLAN ET</button>
             </div>
         </div>
 
-        <div id="tab-r-intel" class="content-area">
+        <!-- INTEL (SPY) -->
+        <div id="tab-r-spy" class="content-area">
             <div class="card">
-                <div class="card-head">MİT & SİBER OPERASYONLAR</div>
-                <button class="btn-main" onclick="game.intelOp('coup')">
-                    <span>Yabancı Ülkede Darbe Planla</span> <span class="cost-tag">500 INT</span>
+                <div class="card-header">GİZLİ SERVİS (MİT/CIA/KGB)</div>
+                <button class="btn" onclick="game.intel.op('coup')">
+                    <span><i class="fa-solid fa-user-ninja"></i> Hükümet Devirme (Darbe)</span> <span class="btn-tag">500 INT</span>
                 </button>
-                <button class="btn-main" onclick="game.intelOp('cyber')">
-                    <span>Siber Saldırı (Altyapı)</span> <span class="cost-tag">100 INT</span>
+                <button class="btn" onclick="game.intel.op('assassin')">
+                    <span><i class="fa-solid fa-skull-crossbones"></i> Lider Suikasti</span> <span class="btn-tag">1000 INT</span>
                 </button>
-                <button class="btn-main" onclick="game.intelOp('steal')">
-                    <span>Teknoloji Çal</span> <span class="cost-tag">250 INT</span>
+                <button class="btn" onclick="game.intel.op('steal')">
+                    <span><i class="fa-solid fa-microchip"></i> Teknoloji Çal</span> <span class="btn-tag">250 INT</span>
+                </button>
+                <button class="btn" onclick="game.intel.op('sabotage')">
+                    <span><i class="fa-solid fa-bomb"></i> Endüstriyel Sabotaj</span> <span class="btn-tag">150 INT</span>
                 </button>
             </div>
-            <div id="intel-log" style="font-family:var(--font-mono); font-size:10px; height:200px; overflow-y:auto; color:#8b949e; border-top:1px solid #333; padding-top:5px;">
-                <div style="color:var(--cyber-green)">> SİSTEM ÇEVRİMİÇİ...</div>
+            <div id="spy-log" style="font-family:var(--font-mono); font-size:10px; height:250px; overflow-y:auto; color:var(--c-grey); border-top:1px solid #333; padding-top:5px;">
+                <div style="color:var(--c-green)">> KRİPTO AĞI AKTİF...</div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="news-ticker">
-    <div id="ticker-content" style="animation: scroll-left 40s linear infinite; padding-left: 100%;">
-        ++ SON DAKİKA: KÜRESEL ENERJİ KRİZİ BÜYÜYOR ++ BM GÜVENLİK KONSEYİ ACİL TOPLANDI ++ BORSALARDA SERT DÜŞÜŞ ++ YENİ SALGIN TEHLİKESİ ++
+<!-- NEWS TICKER -->
+<div id="ticker-bar">
+    <div style="animation: scroll 60s linear infinite; padding-left: 100vw;" id="ticker-content">
+        +++ KÜRESEL GÜNDEM: PETROL FİYATLARI REKOR KIRDI +++ BM GÜVENLİK KONSEYİ ACİL TOPLANDI +++ YENİ PANDEMİ RİSKİ BELİRDİ +++ SİBER SALDIRILAR AVRUPA'YI FELÇ ETTİ +++
     </div>
 </div>
 
-<div class="modal-overlay" id="event-modal">
-    <div class="modal-window">
-        <div class="mw-header">
-            <span id="ev-title">OLAY BAŞLIĞI</span>
-            <i class="fa-solid fa-triangle-exclamation" style="color:var(--cyber-red)"></i>
+<!-- MODAL SYSTEM -->
+<div class="modal-bg" id="modal-wrap">
+    <div class="modal">
+        <div class="modal-head">
+            <span id="m-title">BAŞLIK</span>
+            <i class="fa-solid fa-triangle-exclamation" style="color:var(--c-red)"></i>
         </div>
-        <div class="mw-body" id="ev-body">
-            Olay metni buraya gelecek...
+        <div class="modal-body" id="m-body">
+            İçerik...
         </div>
-        <div class="mw-footer" id="ev-actions">
-            </div>
+        <div class="modal-foot" id="m-foot">
+            <button class="btn" style="width:auto">KAPAT</button>
+        </div>
     </div>
 </div>
 
 <script>
 /**
- * AETERNA: OMEGA v5.0
- * Comprehensive Grand Strategy Engine in a Single File.
- * Author: Gemini (Simulated)
+ * AETERNA: OMEGA ENGINE v7.0 (GRAND ARCHITECT)
+ * - Full Grand Strategy implementation in a single file.
+ * - Advanced AI, Economy, Military, Diplomacy, Espionage.
  */
 
-/* --- DATA & CONFIG --- */
+/* --- CONFIG & DATA --- */
 const CONFIG = {
-    startYear: 2025,
-    tickRate: 1000, // ms per day
-    colors: {
-        player: '#00f3ff',
-        ally: '#0aff0a',
-        enemy: '#ff2a2a',
-        neutral: '#888'
-    }
+    tickRate: 800, // ms per day
+    startYear: 2026,
+    colors: { pl: '#00f3ff', en: '#ff2a2a', al: '#0aff0a', ne: '#666', te:'#fff' }
 };
 
-const WORLD_DATA = {
+const DATA = {
     nations: [
-        { id: 'usa', name: 'ABD', power: 100, stance: 'Neutral', rel: 50, alliance: 'NATO' },
-        { id: 'rus', name: 'Rusya', power: 85, stance: 'Rival', rel: 30, alliance: 'East' },
-        { id: 'chn', name: 'Çin', power: 90, stance: 'Rival', rel: 40, alliance: 'East' },
-        { id: 'eu', name: 'Avrupa B.', power: 80, stance: 'Friendly', rel: 60, alliance: 'NATO' },
-        { id: 'grc', name: 'Yunanistan', power: 20, stance: 'Hostile', rel: 10, alliance: 'NATO' },
-        { id: 'irn', name: 'İran', power: 40, stance: 'Neutral', rel: 45, alliance: 'None' },
-        { id: 'isr', name: 'İsrail', power: 50, stance: 'Neutral', rel: 35, alliance: 'None' }
+        { id:'us', n:'ABD', pwr:100, bloc:'NATO', trait:'Imperialist', rel:50 },
+        { id:'ru', n:'Rusya', pwr:90, bloc:'EAST', trait:'Aggressive', rel:30 },
+        { id:'cn', n:'Çin', pwr:95, bloc:'EAST', trait:'Economic', rel:40 },
+        { id:'eu', n:'Avrupa B.', pwr:85, bloc:'NATO', trait:'Diplomatic', rel:70 },
+        { id:'gr', n:'Yunanistan', pwr:25, bloc:'NATO', trait:'Hostile', rel:10 },
+        { id:'ir', n:'İran', pwr:40, bloc:'EAST', trait:'Theocratic', rel:45 },
+        { id:'il', n:'İsrail', pwr:50, bloc:'NATO', trait:'Militarist', rel:55 },
+        { id:'sy', n:'Suriye', pwr:10, bloc:'None', trait:'Chaos', rel:20 },
+        { id:'uk', n:'İngiltere', pwr:70, bloc:'NATO', trait:'Diplomatic', rel:65 }
     ],
     techs: [
-        { id: 't1', name: 'Endüstri 4.0', cost: 200, icon: 'fa-industry' },
-        { id: 't2', name: 'Yapay Zeka', cost: 500, icon: 'fa-brain' },
-        { id: 't3', name: 'Nükleer Enerji', cost: 1000, icon: 'fa-atom' },
-        { id: 't4', name: 'Kuantum Radar', cost: 800, icon: 'fa-wifi' },
-        { id: 't5', name: 'Uzay Savunma', cost: 2000, icon: 'fa-satellite' }
+        { id:'t1', n:'Yapay Zeka Savunma', c:500, i:'fa-brain' },
+        { id:'t2', n:'Hipersonik Füzeler', c:800, i:'fa-rocket' },
+        { id:'t3', n:'Kuantum Şifreleme', c:600, i:'fa-lock' },
+        { id:'t4', n:'Füzyon Enerjisi', c:1500, i:'fa-atom' },
+        { id:'t5', n:'Uzay Lazerleri (ODIN)', c:3000, i:'fa-satellite' },
+        { id:'t6', n:'Biyo-Genetik Asker', c:1000, i:'fa-dna' },
+        { id:'t7', n:'Görünmezlik (Stealth)', c:1200, i:'fa-plane' }
     ],
     provinces: [
-        // Basitleştirilmiş harita düğümleri
-        { id:0, name:'Ankara', x:350, y:200, owner:'player', pop:6, type:'city' },
-        { id:1, name:'İstanbul', x:250, y:150, owner:'player', pop:16, type:'ind' },
-        { id:2, name:'İzmir', x:180, y:280, owner:'player', pop:4, type:'port' },
-        { id:3, name:'Antalya', x:300, y:350, owner:'player', pop:2, type:'tour' },
-        { id:4, name:'Diyarbakır', x:550, y:280, owner:'player', pop:2, type:'city' },
-        { id:5, name:'Erzurum', x:500, y:180, owner:'player', pop:1, type:'mil' },
-        { id:6, name:'Atina', x:100, y:300, owner:'grc', pop:3, type:'city' },
-        { id:7, name:'Selanik', x:120, y:200, owner:'grc', pop:1, type:'port' },
-        { id:8, name:'Şam', x:550, y:400, owner:'terror', pop:2, type:'war' },
-        { id:9, name:'Bağdat', x:650, y:450, owner:'terror', pop:5, type:'war' },
-        { id:10, name:'Tebriz', x:650, y:250, owner:'irn', pop:2, type:'city' },
-        { id:11, name:'Moskova (Uzak)', x:500, y:50, owner:'rus', pop:12, type:'cap' }
+        { id:0, n:'Ankara', x:400, y:250, o:'pl', t:'city', pop:6, res:'none' },
+        { id:1, n:'İstanbul', x:300, y:180, o:'pl', t:'ind', pop:16, res:'trade' },
+        { id:2, n:'İzmir', x:250, y:300, o:'pl', t:'port', pop:4, res:'trade' },
+        { id:3, n:'Antalya', x:350, y:400, o:'pl', t:'tour', pop:2, res:'agri' },
+        { id:4, n:'Diyarbakır', x:600, y:300, o:'pl', t:'city', pop:2, res:'oil' },
+        { id:5, n:'Erzurum', x:550, y:200, o:'pl', t:'mil', pop:1, res:'mine' },
+        { id:6, n:'Atina', x:150, y:350, o:'gr', t:'cap', pop:4, res:'trade' },
+        { id:7, n:'Selanik', x:180, y:220, o:'gr', t:'port', pop:1, res:'trade' },
+        { id:8, n:'Şam', x:600, y:450, o:'sy', t:'war', pop:3, res:'none' },
+        { id:9, n:'Halep', x:620, y:400, o:'sy', t:'war', pop:2, res:'oil' },
+        { id:10, n:'Tahran', x:800, y:300, o:'ir', t:'cap', pop:8, res:'oil' },
+        { id:11, n:'Moskova', x:600, y:50, o:'ru', t:'cap', pop:12, res:'gas' },
+        { id:12, n:'Kıbrıs', x:450, y:450, o:'pl', t:'strat', pop:1, res:'gas' },
+        { id:13, n:'Bakü', x:750, y:200, o:'az', t:'oil', pop:3, res:'oil' }
     ]
 };
 
 /* --- CORE ENGINE --- */
 const game = {
     state: {
-        date: new Date(2025, 0, 1),
+        date: new Date(2026, 0, 1),
         paused: false,
-        resources: {
-            money: 5000, // Million $
-            pp: 250, // Political Power
-            intel: 50,
-            energy: 100, // Energy Units
-            oil: 500, // Barrels (k)
-            tech: 0
-        },
-        stats: {
-            gdp: 900, // Billion $
-            debt: 200,
-            stability: 60,
-            warSupport: 50,
-            defcon: 5,
-            inflation: 15
-        },
-        military: {
-            manpower: 800000,
-            logistics: 90,
-            fatigue: 0,
-            doctrine: 'def',
-            units: { inf:50, tank:5, jet:2, ship:3, drone:10 }
-        },
-        diplomacy: {}, // Map of nation IDs to relation data
-        provinces: [],
-        wars: [],
+        res: { money: 1000, pp: 500, intel: 100, fuel: 1000, ammo: 1000, rp: 0, rare: 50 },
+        stats: { gdp: 950, debt: 320, stab: 60, defcon: 5, inf: 12, pres: 50 },
+        mil: { man: 1200, log: 90, fat: 0, doc: 'def', units: { inf:50, tank:10, air:5, sea:4, drone:20, space:0 } },
+        rel: {}, // Diplomacy map
+        provs: [],
         events: []
     },
-
+    
+    selProv: null,
+    selNat: null,
     timer: null,
-    selectedProv: null,
-    selectedNation: null,
 
     init() {
-        console.log("OMEGA ENGINE STARTING...");
+        console.log("AETERNA OMEGA v7 BOOT SEQUENCE...");
         
-        // Initialize State
-        WORLD_DATA.provinces.forEach(p => {
-            this.state.provinces.push({
+        // Init Provinces
+        DATA.provinces.forEach(p => {
+            this.state.provs.push({
                 ...p,
-                loyalty: p.owner === 'player' ? 90 : 0,
-                risk: p.owner === 'terror' ? 100 : 5,
-                infrastructure: 80,
-                troops: p.owner === 'player' ? 5 : 10
+                loy: p.o==='pl'?95:10,
+                risk: p.o==='sy'?90:5,
+                inf: 80,
+                def: 50
             });
         });
 
-        WORLD_DATA.nations.forEach(n => {
-            this.state.diplomacy[n.id] = { 
-                rel: n.rel, 
-                embargo: false, 
-                alliance: false, 
-                atWar: false 
-            };
+        // Init Diplomacy
+        DATA.nations.forEach(n => {
+            this.state.rel[n.id] = { val: n.rel, war: false, trd: false, aly: false, emb: false };
         });
 
         ui.init();
@@ -555,410 +588,482 @@ const game = {
     tick() {
         const s = this.state;
         s.date.setDate(s.date.getDate() + 1);
-
-        // 1. ECONOMY CALCULATION
-        const dailyIncome = (s.stats.gdp * 0.05) / 365; // Tax revenue
-        const armyMaint = this.calcArmyCost();
-        const debtInterest = (s.stats.debt * 0.05) / 365;
         
-        s.resources.money += (dailyIncome - armyMaint - debtInterest);
-        s.resources.pp += 0.5;
-        s.resources.intel += 0.2;
-        s.resources.oil -= (Object.values(s.military.units).reduce((a,b)=>a+b,0) * 0.01); // Fuel usage
-
-        // 2. STABILITY & RISKS
-        if(s.resources.money < 0) {
-            s.stats.debt += Math.abs(s.resources.money);
-            s.resources.money = 0;
-            s.stats.inflation += 0.01;
-            s.stats.stability -= 0.05;
-        }
-        if(s.resources.oil <= 0) {
-            s.military.logistics = Math.max(10, s.military.logistics - 1);
-            ui.log("KRİTİK: YAKIT TÜKENDİ! ORDU DURMA NOKTASINDA!", true);
-        }
-
-        // 3. AI & DIPLOMACY SIMULATION
-        if(Math.random() < 0.01) this.aiEvent();
-
-        // 4. BATTLE CALCULATION (If at war)
-        this.calcBattles();
+        // 1. Module Updates
+        this.eco.tick();
+        this.mil.tick();
+        this.ai.tick();
+        this.pol.tick();
+        
+        // 2. Random Events
+        if(Math.random() < 0.03) this.ai.randomEvent();
 
         ui.update();
         map.draw();
     },
 
-    calcArmyCost() {
-        const u = this.state.military.units;
-        return (u.inf*0.1) + (u.tank*0.5) + (u.jet*2) + (u.ship*3) + (u.drone*0.2);
-    },
-
-    calcBattles() {
-        // Simple abstract battle logic per province
-        this.state.provinces.forEach(p => {
-            if(p.owner === 'player' && p.risk > 80) {
-                // Insurgency battle
-                if(Math.random() < 0.1) {
-                    p.troops -= 1;
-                    ui.log(`${p.name} bölgesinde çatışma! Kayıp verdik.`, true);
-                    s.stats.stability -= 1;
-                }
-            }
-        });
-    },
-
-    aiEvent() {
-        const nations = WORLD_DATA.nations;
-        const actor = nations[Math.floor(Math.random() * nations.length)];
-        const actions = ['embargo', 'drill', 'statement', 'crisis'];
-        const act = actions[Math.floor(Math.random() * actions.length)];
-
-        let msg = "";
-        if(act === 'embargo') msg = `${actor.name} ticaret kısıtlamaları getirdi.`;
-        if(act === 'drill') msg = `${actor.name} sınırda askeri tatbikat başlattı.`;
-        if(act === 'statement') msg = `${actor.name} lideri sert açıklamalarda bulundu.`;
-        if(act === 'crisis') {
-            msg = `EKONOMİK ŞOK: ${actor.name} borsası çöktü!`;
-            this.state.stats.gdp -= 10;
-        }
-
-        ui.ticker(msg);
-    },
-
-    // --- PLAYER ACTIONS ---
     togglePause() {
         this.state.paused = !this.state.paused;
-        document.getElementById('date-display').style.color = this.state.paused ? 'red' : 'var(--cyber-gold)';
+        document.getElementById('pause-status').innerText = this.state.paused ? "[ DURAKLATILDI ]" : "[ SPACE: DURDUR ]";
     },
 
-    toggleDefcon() {
-        let d = this.state.stats.defcon - 1;
-        if(d < 1) d = 5;
-        this.state.stats.defcon = d;
-        ui.update();
+    /* --- MODULES --- */
+    
+    // POLITICS MODULE
+    pol: {
+        tick() {
+            game.state.res.pp += 0.5;
+            game.state.stats.pres = Math.min(100, game.state.stats.pres + 0.01);
+        },
+        action(type) {
+            const s = game.state;
+            if(type === 'election') {
+                if(s.res.pp >= 500) { s.res.pp-=500; s.stats.stab+=15; ui.alert("Seçim Sonuçları", "Halk güven tazeledi. İstikrar arttı."); }
+            }
+            if(type === 'purge') {
+                if(s.res.pp >= 100) { s.res.pp-=100; s.stats.stab+=5; ui.log("Parti içi temizlik yapıldı.", 'orange'); }
+            }
+            if(type === 'martial') {
+                if(s.res.pp >= 1000) { s.res.pp-=1000; s.stats.stab=100; s.stats.gdp*=0.8; ui.alert("SIKIYÖNETİM", "Ordu yönetime el koydu. Ekonomi çöktü ama düzen sağlandı."); }
+            }
+        },
+        unVote() {
+            if(Math.random() > 0.5) {
+                game.state.stats.pres += 10;
+                ui.alert("BM Oylaması", "Tasarı lehimize sonuçlandı. Prestij kazandık.");
+            } else {
+                game.state.stats.pres -= 5;
+                ui.alert("BM Oylaması", "Veto yedik. Prestij kaybı.");
+            }
+        }
     },
 
-    recruit(type) {
-        const costs = { inf:100, tank:500, jet:2000, ship:3000, drone:300 };
-        const cost = costs[type];
-        if(this.state.resources.money >= cost) {
-            this.state.resources.money -= cost;
-            this.state.military.units[type]++;
-            ui.log(`${type.toUpperCase()} birliği sipariş edildi.`);
+    // ECONOMY MODULE
+    eco: {
+        tick() {
+            const s = game.state;
+            // Income
+            const daily = (s.stats.gdp * 0.001) - (s.stats.debt * 0.0001);
+            const milCost = game.mil.calcCost();
+            s.res.money += daily - milCost;
+            
+            // Inflation Logic
+            if(s.res.money < 0) { s.stats.debt += 1; s.stats.inf += 0.05; }
+            if(s.stats.inf > 50) ui.log("HİPERENFLASYON UYARISI!", 'red');
+        },
+        buy(res) {
+            const s = game.state;
+            if(res==='oil' && s.res.money>=50) { s.res.money-=50; s.res.fuel+=1000; ui.log("Petrol ithal edildi."); }
+            if(res==='rare' && s.res.money>=100) { s.res.money-=100; s.res.rare+=100; ui.log("Nadir element alındı."); }
+        },
+        lunder() {
+            const s = game.state;
+            if(Math.random() > 0.4) {
+                s.res.money += 2; // Billion
+                ui.log("Kara para başarıyla sisteme sokuldu.", 'lime');
+            } else {
+                s.stats.pres -= 5;
+                s.stats.stab -= 2;
+                ui.alert("SKANDAL!", "Para aklama operasyonu deşifre oldu. Uluslararası itibar zedelendi.");
+            }
+        },
+        build(type) {
+            if(game.state.res.money >= 0.5) {
+                game.state.res.money -= 0.5;
+                game.state.stats.gdp += 10;
+                ui.log("Sanayi yatırımı tamamlandı.");
+            }
+        }
+    },
+
+    // MILITARY MODULE
+    mil: {
+        tick() {
+            const s = game.state;
+            // Fuel/Ammo Consumption based on units
+            const usage = (s.mil.units.tank * 0.5) + (s.mil.units.air * 2) + (s.mil.units.sea * 3);
+            s.res.fuel -= usage * 0.1;
+            
+            // Logistics Check
+            if(s.res.fuel <= 0) {
+                s.res.fuel = 0;
+                s.mil.log = Math.max(10, s.mil.log - 1);
+                if(Math.random()<0.1) ui.log("KRİTİK: YAKIT BİTTİ! Birlikler hareket edemiyor.", 'red');
+            } else {
+                s.mil.log = Math.min(100, s.mil.log + 0.5);
+            }
+            
+            this.simCombat();
+        },
+        calcCost() {
+            const u = game.state.mil.units;
+            return (u.inf*0.01 + u.tank*0.05 + u.air*0.2 + u.sea*0.3 + u.space*1);
+        },
+        train(type) {
+            const costs = { inf:10, tank:50, air:200, sea:300, drone:30, space:1000 };
+            const cost = costs[type];
+            if(game.state.res.money >= cost/1000) {
+                game.state.res.money -= cost/1000;
+                game.state.mil.units[type]++;
+                ui.log(`${type.toUpperCase()} birliği envantere girdi.`);
+            }
+        },
+        setDoctrine(d) {
+            game.state.mil.doc = d;
+            ui.log(`Doktrin değişti: ${d.toUpperCase()}`);
+        },
+        toggleDefcon() {
+            let d = game.state.stats.defcon - 1;
+            if(d < 1) d = 5;
+            game.state.stats.defcon = d;
             ui.update();
-        } else {
-            ui.log("Yetersiz Fon!", true);
+        },
+        cyberAttack() {
+            if(game.state.res.intel >= 100) {
+                game.state.res.intel -= 100;
+                ui.log("Düşman radar sistemlerine siber saldırı başlatıldı...", 'cyan');
+            }
+        },
+        simCombat() {
+            // Check wars
+            game.state.provs.forEach(p => {
+                if(p.o === 'pl' && p.risk > 80) {
+                    if(Math.random() < 0.1) {
+                        game.state.mil.units.inf -= 1;
+                        game.state.stats.stab -= 1;
+                        ui.log(`ÇATIŞMA: ${p.n} bölgesinde terör saldırısı! Kayıp verdik.`, 'red');
+                    }
+                }
+            });
         }
     },
 
-    action(act) {
-        const s = this.state;
-        if(act === 'law_martial') {
-            if(s.resources.pp >= 150) {
-                s.resources.pp -= 150;
-                s.stats.stability += 20;
-                s.stats.gdp *= 0.95; // Economy hurt
-                ui.log("Sıkıyönetim ilan edildi. Düzen sağlandı, ekonomi yavaşladı.");
-            }
-        }
-        else if(act === 'prop_national') {
-            if(s.resources.pp >= 20) {
-                s.resources.pp -= 20;
-                s.stats.warSupport += 5;
-                ui.log("Propaganda yayını yapıldı.");
-            }
-        }
-        // ... more actions
-    },
+    // DIPLOMACY MODULE
+    dip: {
+        act(type) {
+            if(!game.selNat) return;
+            const nid = game.selNat.id;
+            const d = game.state.rel[nid];
+            const pp = game.state.res.pp;
 
-    trade(type) {
-        if(type === 'buy_oil') {
-            if(this.state.resources.money >= 50) {
-                this.state.resources.money -= 50;
-                this.state.resources.oil += 1000;
-                ui.log("Petrol sevkiyatı limana ulaştı.");
+            if(type === 'improve') {
+                if(pp >= 50) { game.state.res.pp-=50; d.val+=10; ui.log("Diplomatik nota gönderildi."); }
             }
-        }
-        if(type === 'debt_imf') {
-            this.state.resources.money += 10000;
-            this.state.stats.debt += 12000;
-            this.state.resources.pp -= 50;
-            ui.log("IMF Kredisi onaylandı. Bağımsızlık azaldı.");
+            if(type === 'alliance') {
+                if(d.val > 80) { d.aly = true; ui.alert("İTTİFAK", `${game.selNat.n} ile müttefik oldunuz!`); }
+                else ui.log("İttifak teklifi reddedildi.", 'red');
+            }
+            if(type === 'war') {
+                ui.modal("SAVAŞ İLANI", `${game.selNat.n} ile savaşa giriyorsunuz. Bu geri dönülemez.`, [
+                    { t:"SALDIR", c:'btn-danger', f:()=>{ 
+                        d.war=true; game.state.stats.defcon=1; 
+                        ui.alert("SAVAŞ BAŞLADI", "Genelkurmay harekât planını devreye soktu."); 
+                        ui.closeModal(); 
+                    }},
+                    { t:"İPTAL", c:'btn', f:()=>ui.closeModal() }
+                ]);
+            }
+            ui.refreshDip();
         }
     },
 
-    diploAction(type) {
-        if(!this.selectedNation) return;
-        const nid = this.selectedNation.id;
-        const rel = this.state.diplomacy[nid];
-        const pp = this.state.resources.pp;
-
-        if(type === 'improve') {
-            if(pp >= 50) {
-                this.state.resources.pp -= 50;
-                rel.rel += 10;
-                ui.log("Diplomatik heyet gönderildi.");
+    // INTEL MODULE
+    intel: {
+        op(type) {
+            const cost = { coup:500, assassin:1000, steal:250, sabotage:150 }[type];
+            if(game.state.res.intel >= cost) {
+                game.state.res.intel -= cost;
+                
+                setTimeout(() => {
+                    const success = Math.random() > 0.5;
+                    if(success) {
+                        ui.alert("OPERASYON BAŞARILI", `${type.toUpperCase()} operasyonu hedefe ulaştı.`);
+                        if(type==='steal') { game.state.res.rp += 500; ui.log("Teknoloji çalındı: +500 RP", 'lime'); }
+                        if(type==='coup') ui.log("Hedef ülkede rejim değişti.", 'lime');
+                    } else {
+                        ui.alert("OPERASYON DEŞİFRE OLDU", "Ajanlarımız yakalandı. Uluslararası kriz!", 'red');
+                        game.state.stats.pres -= 20;
+                    }
+                }, 2000);
+                
+                ui.log("Ajanlar sahaya iniyor...", 'cyan');
+            } else {
+                ui.log("Yetersiz İstihbarat Ağı!", 'red');
             }
         }
-        if(type === 'war') {
-            this.triggerEvent("SAVAŞ İLANI", `${this.selectedNation.name} ile savaşa girmek üzeresiniz. Bu geri dönülemez bir karar.`, [
-                { txt: "SALDIR", act: () => { 
-                    rel.atWar = true; 
-                    this.state.stats.defcon = 1; 
-                    ui.log("SAVAŞ BAŞLADI!"); 
+    },
+
+    // SOCIAL MODULE
+    soc: {
+        propaganda() {
+            if(game.state.res.pp >= 50) {
+                game.state.res.pp -= 50;
+                game.state.stats.stab += 5;
+                ui.log("Ulusal kanallarda propaganda yapıldı.");
+            }
+        },
+        raid() {
+            game.state.provs.forEach(p => { if(p.o==='pl') p.risk = Math.max(0, p.risk-10); });
+            ui.log("Polis özel harekat baskınları düzenledi.");
+        },
+        censorship() {
+            game.state.stats.stab += 2;
+            game.state.stats.pres -= 1;
+            ui.log("İnternet bant genişliği daraltıldı.");
+        }
+    },
+
+    // MAP ACTIONS
+    mapAct(type) {
+        if(game.selProv === null) return;
+        const p = game.state.provs[game.selProv];
+        
+        if(type==='invest' && game.state.res.money>=0.1) {
+            game.state.res.money-=0.1; p.inf+=5; ui.log(`${p.n} altyapısı geliştirildi.`);
+        }
+        if(type==='nuke') {
+            ui.modal("NÜKLEER SALDIRI ONAYI", "Milyonlarca insan ölecek. Onaylıyor musunuz?", [
+                { t:"ATEŞLE", c:'btn-danger', f:()=>{
+                    p.pop=0; p.inf=0; ui.alert("KIYAMET", "Nükleer başlık patladı."); ui.closeModal();
                 }},
-                { txt: "İPTAL", act: () => {} }
+                { t:"İPTAL", c:'btn', f:()=>ui.closeModal() }
             ]);
         }
-        ui.refreshDiplo();
-    },
-
-    provAction(type) {
-        if(this.selectedProv === null) return;
-        const p = this.state.provinces[this.selectedProv];
-        
-        if(type === 'invest') {
-            if(this.state.resources.money >= 100) {
-                this.state.resources.money -= 100;
-                p.infrastructure += 5;
-                ui.log(`${p.name} altyapısı geliştirildi.`);
-            }
-        }
-        else if(type === 'suppress') {
-            p.risk = Math.max(0, p.risk - 20);
-            p.loyalty -= 5;
-            ui.log("Askeri müdahale yapıldı.");
-        }
         ui.update();
     },
 
-    triggerEvent(title, body, buttons) {
-        const m = document.getElementById('event-modal');
-        document.getElementById('ev-title').innerText = title;
-        document.getElementById('ev-body').innerText = body;
-        const f = document.getElementById('ev-actions');
-        f.innerHTML = '';
-        
-        buttons.forEach(b => {
-            const btn = document.createElement('button');
-            btn.className = 'btn-main';
-            btn.style.width = 'auto';
-            btn.innerText = b.txt;
-            btn.onclick = () => {
-                b.act();
-                m.style.display = 'none';
-            };
-            f.appendChild(btn);
-        });
-        m.style.display = 'flex';
+    // AI & EVENTS
+    ai: {
+        tick() {
+            // Nations act based on traits
+            DATA.nations.forEach(n => {
+                if(game.state.rel[n.id].war && Math.random()<0.05) {
+                    ui.log(`${n.n} cephesinde ağır bombardıman!`, 'red');
+                }
+            });
+        },
+        randomEvent() {
+            const evs = [
+                "Küresel Petrol Krizi: Yakıt Fiyatları Arttı!",
+                "Komşu Ülkede İç Savaş Çıktı.",
+                "Siber Saldırı: Bankacılık Sistemi Çöktü.",
+                "Yeni Bir Pandemi Uyarısı!",
+                "Mülteci Dalgası Sınıra Dayandı."
+            ];
+            const e = evs[Math.floor(Math.random()*evs.length)];
+            ui.ticker(e);
+            
+            // Randomly affect stats
+            if(Math.random()<0.5) game.state.stats.gdp -= 5;
+        },
+        nationAct() {
+            // AI Logic placeholder
+        }
     }
 };
 
 /* --- UI CONTROLLER --- */
 const ui = {
     init() {
-        this.renderTechTree();
-        this.renderDiploList();
-        
-        // Setup Parliament Chart
-        const ctx = document.getElementById('parliament-chart').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['İktidar', 'Muhalefet', 'Diğer'],
-                datasets: [{ data: [320, 200, 80], backgroundColor: ['#00f3ff', '#ff2a2a', '#777'], borderWidth:0 }]
-            },
-            options: { cutout: '70%', plugins: {legend:{display:false}} }
+        // Render Techs
+        const tc = document.getElementById('tech-list');
+        DATA.techs.forEach(t => {
+            tc.innerHTML += `<div class="btn">
+                <span><i class="fa-solid ${t.i}"></i> ${t.n}</span>
+                <span class="btn-tag">${t.c} RP</span>
+            </div>`;
         });
+        
+        this.refreshDip();
     },
 
     update() {
         const s = game.state;
         
-        // HUD
-        document.getElementById('hud-money').innerText = `$${Math.floor(s.resources.money)}M`;
-        document.getElementById('hud-pp').innerText = Math.floor(s.resources.pp);
-        document.getElementById('hud-intel').innerText = Math.floor(s.resources.intel);
-        document.getElementById('hud-energy').innerText = s.resources.energy + '%';
-        document.getElementById('hud-oil').innerText = Math.floor(s.resources.oil) + 'k';
-        document.getElementById('hud-stab').innerText = Math.floor(s.stats.stability) + '%';
+        // Metrics
+        document.getElementById('val-money').innerText = '$' + s.res.money.toFixed(1) + 'B';
+        document.getElementById('val-pp').innerText = Math.floor(s.res.pp);
+        document.getElementById('val-pres').innerText = Math.floor(s.stats.pres);
+        document.getElementById('val-fuel').innerText = Math.floor(s.res.fuel);
+        document.getElementById('val-ammo').innerText = Math.floor(s.res.ammo);
+        document.getElementById('val-stab').innerText = Math.floor(s.stats.stab) + '%';
         
-        const def = document.getElementById('defcon-disp');
-        def.innerText = "DEFCON " + s.stats.defcon;
-        def.style.color = s.stats.defcon === 1 ? '#fff' : 'var(--cyber-red)';
-        def.style.background = s.stats.defcon === 1 ? 'var(--cyber-red)' : 'transparent';
-
-        document.getElementById('date-display').innerText = s.date.toLocaleDateString('tr-TR');
-
-        // ECO
-        document.getElementById('eco-gdp').innerText = `$${Math.floor(s.stats.gdp)}B`;
-        document.getElementById('eco-debt').innerText = `$${Math.floor(s.stats.debt)}B`;
-
-        // MILITARY
-        document.getElementById('cnt-inf').innerText = s.military.units.inf;
-        document.getElementById('cnt-tank').innerText = s.military.units.tank;
-        document.getElementById('cnt-jet').innerText = s.military.units.jet;
-        document.getElementById('cnt-ship').innerText = s.military.units.ship;
-        document.getElementById('cnt-drone').innerText = s.military.units.drone;
+        document.getElementById('date-main').innerText = s.date.toLocaleDateString('tr-TR');
+        
+        // Defcon
+        const d = document.getElementById('defcon-disp');
+        d.innerText = "DEFCON " + s.stats.defcon;
+        d.style.background = s.stats.defcon===1 ? 'var(--c-red)' : 'rgba(50,0,0,0.4)';
+        
+        // Unit Counts
+        const u = s.mil.units;
+        document.getElementById('u-inf').innerText = u.inf;
+        document.getElementById('u-tank').innerText = u.tank;
+        document.getElementById('u-air').innerText = u.air;
+        document.getElementById('u-sea').innerText = u.sea;
+        document.getElementById('u-drone').innerText = u.drone;
+        document.getElementById('u-space').innerText = u.space;
 
         // Province Detail
-        if(game.selectedProv !== null) {
-            const p = game.state.provinces[game.selectedProv];
-            document.getElementById('pd-risk').innerText = Math.floor(p.risk) + '%';
-            document.getElementById('pd-loyalty').innerText = Math.floor(p.loyalty) + '%';
-            document.getElementById('pd-infra').innerText = Math.floor(p.infrastructure) + '%';
+        if(game.selProv !== null) {
+            const p = game.state.provs[game.selProv];
+            document.getElementById('p-inf').innerText = Math.floor(p.inf) + '%';
+            document.getElementById('p-loy').innerText = Math.floor(p.loy) + '%';
+            document.getElementById('p-risk').innerText = Math.floor(p.risk) + '%';
+            document.getElementById('btn-nuke').disabled = (s.stats.defcon > 1);
         }
+        
+        // RP
+        game.state.res.rp += 0.1;
+        document.getElementById('val-rp').innerText = s.res.rp.toFixed(1);
     },
 
-    renderTechTree() {
-        const c = document.getElementById('tech-tree');
-        WORLD_DATA.techs.forEach(t => {
-            c.innerHTML += `
-                <div class="btn-main" style="opacity:${game.state.resources.tech >= t.cost ? 1 : 0.6}">
-                    <div><i class="fa-solid ${t.icon}"></i> ${t.name}</div>
-                    <div class="cost-tag">${t.cost} RP</div>
-                </div>
-            `;
-        });
-    },
-
-    renderDiploList() {
-        const c = document.getElementById('diplo-list');
+    refreshDip() {
+        const c = document.getElementById('dip-list');
         c.innerHTML = '';
-        WORLD_DATA.nations.forEach(n => {
-            const d = game.state.diplomacy[n.id];
-            let tag = '';
-            if(d.atWar) tag = '<span class="tag-diplo tag-enemy">SAVAŞTA</span>';
-            else if(d.rel > 80) tag = '<span class="tag-diplo tag-ally">DOST</span>';
-            else if(d.rel < 20) tag = '<span class="tag-diplo tag-enemy">DÜŞMAN</span>';
+        DATA.nations.forEach(n => {
+            const d = game.state.rel[n.id];
+            let col = '#888';
+            if(d.war) col = 'var(--c-red)';
+            else if(d.aly) col = 'var(--c-green)';
+            else if(d.val > 60) col = 'var(--c-blue)';
             
             const el = document.createElement('div');
-            el.className = 'btn-main';
-            el.innerHTML = `<span>${n.name}</span> <div>${tag} <span style="font-size:10px">${d.rel} Rel</span></div>`;
+            el.className = 'btn';
+            el.innerHTML = `<span>${n.n}</span> <span style="color:${col}; font-weight:bold">${d.val}</span>`;
             el.onclick = () => {
-                game.selectedNation = n;
-                document.getElementById('diplo-actions').style.display = 'block';
-                document.getElementById('da-title').innerText = n.name + " DİPLOMASİSİ";
+                game.selNat = n;
+                document.getElementById('dip-actions').style.display = 'block';
+                document.getElementById('dip-target').innerText = n.n;
             };
             c.appendChild(el);
         });
     },
 
-    refreshDiplo() {
-        this.renderDiploList();
-    },
-
-    log(msg, isErr=false) {
-        const l = document.getElementById('intel-log');
-        const color = isErr ? 'var(--cyber-red)' : '#00f3ff';
-        l.innerHTML = `<div style="color:${color}; margin-bottom:2px;">> ${msg}</div>` + l.innerHTML;
-    },
-
-    ticker(msg) {
-        const t = document.getElementById('ticker-content');
-        t.innerText += " ++ " + msg;
-    },
-
     tab(side, id) {
-        const p = side==='l' ? 0 : 2;
-        const panel = document.querySelectorAll('.panel')[p];
-        panel.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        const idx = side==='l' ? 0 : 2;
+        const panel = document.querySelectorAll('.panel')[idx];
+        panel.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         panel.querySelectorAll('.content-area').forEach(c => c.classList.remove('active'));
         event.currentTarget.classList.add('active');
         document.getElementById(`tab-${side}-${id}`).classList.add('active');
+    },
+
+    log(msg, color='#fff') {
+        const l = document.getElementById('spy-log');
+        l.innerHTML = `<div style="color:${color}; margin-bottom:4px; border-bottom:1px solid #222;">> ${msg}</div>` + l.innerHTML;
+    },
+
+    ticker(msg) {
+        document.getElementById('ticker-content').innerText += " +++ " + msg;
+    },
+
+    modal(title, body, buttons) {
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-body').innerText = body;
+        const f = document.getElementById('m-foot');
+        f.innerHTML = '';
+        buttons.forEach(b => {
+            const btn = document.createElement('button');
+            btn.className = 'btn ' + (b.c || '');
+            btn.style.width = 'auto';
+            btn.innerText = b.t;
+            btn.onclick = b.f;
+            f.appendChild(btn);
+        });
+        document.getElementById('modal-wrap').style.display = 'flex';
+    },
+    
+    closeModal() { document.getElementById('modal-wrap').style.display = 'none'; },
+    
+    alert(title, msg) {
+        this.modal(title, msg, [{t:"TAMAM", f:()=>this.closeModal()}]);
     }
 };
 
-/* --- MAP RENDERER --- */
+/* --- CANVAS MAP ENGINE --- */
 const map = {
-    canvas: null, ctx: null, mode: 'pol',
+    cvs: null, ctx: null, mode: 'pol', particles: [],
 
     init() {
-        this.canvas = document.getElementById('map-canvas');
-        this.ctx = this.canvas.getContext('2d');
+        this.cvs = document.getElementById('map-canvas');
+        this.ctx = this.cvs.getContext('2d');
         
-        new ResizeObserver(()=>this.resize()).observe(document.getElementById('map-wrapper'));
-        this.canvas.addEventListener('mousedown', e => this.click(e));
-        
-        this.resize();
+        // Resize
+        const r = document.getElementById('map-wrapper');
+        this.cvs.width = r.offsetWidth;
+        this.cvs.height = r.offsetHeight;
+
+        this.cvs.addEventListener('mousedown', e => this.click(e));
         this.animate();
-    },
-
-    setMode(m) {
-        this.mode = m;
-        document.querySelectorAll('.map-mode').forEach(b => b.classList.remove('active'));
-        event.target.classList.add('active');
-    },
-
-    resize() {
-        this.canvas.width = document.getElementById('map-wrapper').offsetWidth;
-        this.canvas.height = document.getElementById('map-wrapper').offsetHeight;
     },
 
     draw() {
         const ctx = this.ctx;
-        const w = this.canvas.width;
-        const h = this.canvas.height;
+        const w = this.cvs.width;
+        const h = this.cvs.height;
         
-        ctx.fillStyle = '#050505';
+        // BG
+        ctx.fillStyle = '#020202';
         ctx.fillRect(0,0,w,h);
         
-        // Grid Effect
+        // Grid
         ctx.strokeStyle = '#111'; ctx.lineWidth=1;
-        for(let i=0; i<w; i+=40) { ctx.beginPath(); ctx.moveTo(i,0); ctx.lineTo(i,h); ctx.stroke(); }
-        for(let i=0; i<h; i+=40) { ctx.beginPath(); ctx.moveTo(0,i); ctx.lineTo(w,i); ctx.stroke(); }
+        for(let x=0; x<w; x+=50) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+        for(let y=0; y<h; y+=50) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
 
         // Connections
-        ctx.strokeStyle = '#333';
-        const provs = game.state.provinces;
-        provs.forEach((p1, i) => {
-            provs.forEach((p2, j) => {
-                if(i<j && Math.hypot(p1.x-p2.x, p1.y-p2.y) < 180) {
+        ctx.strokeStyle = '#222';
+        game.state.provs.forEach((p1, i) => {
+            game.state.provs.forEach((p2, j) => {
+                if(i<j && Math.hypot(p1.x-p2.x, p1.y-p2.y) < 150) {
                     ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
                 }
             });
         });
 
         // Nodes
-        provs.forEach(p => {
-            let color = '#555';
-            let radius = 6 + (p.pop/2);
-
+        game.state.provs.forEach(p => {
+            let col = '#444';
+            let r = 8 + (p.pop/2);
+            
             // Mode Logic
             if(this.mode === 'pol') {
-                if(p.owner === 'player') color = CONFIG.colors.player;
-                else if(p.owner === 'terror') color = '#000'; // Black Ops
+                if(p.o === 'pl') col = CONFIG.colors.pl;
+                else if(p.o === 'sy') col = '#333';
                 else {
-                    const nat = WORLD_DATA.nations.find(n => n.id === p.owner);
+                    const nat = DATA.nations.find(n => n.id === p.o);
                     if(nat) {
-                         const rel = game.state.diplomacy[nat.id];
-                         color = rel.atWar ? CONFIG.colors.enemy : (rel.rel > 80 ? CONFIG.colors.ally : CONFIG.colors.neutral);
+                         const rel = game.state.rel[nat.id];
+                         col = rel.war ? CONFIG.colors.en : (rel.aly ? CONFIG.colors.al : CONFIG.colors.ne);
                     }
                 }
-            }
-            else if(this.mode === 'mil') {
-                const threat = p.risk / 100;
-                color = `rgba(255, ${255-(threat*255)}, ${255-(threat*255)}, 1)`;
+            } else if(this.mode === 'mil') {
+                col = `rgba(255, ${255-(p.risk*2)}, 0, 1)`;
+            } else if(this.mode === 'eco') {
+                col = p.res === 'oil' ? '#333' : (p.res === 'trade' ? CONFIG.colors.pl : '#666');
+                if(p.res === 'oil') r += 2;
             }
 
-            // Selection Glow
-            if(game.selectedProv === p.id) {
-                ctx.shadowBlur = 15; ctx.shadowColor = '#fff'; ctx.fillStyle = '#fff';
+            // Selection
+            if(game.selProv === p.id) {
+                ctx.shadowBlur = 20; ctx.shadowColor = '#fff'; ctx.fillStyle = '#fff';
             } else {
-                ctx.shadowBlur = 0; ctx.fillStyle = color;
+                ctx.shadowBlur = 10; ctx.shadowColor = col; ctx.fillStyle = col;
             }
 
-            // Terror/War Indicator
-            if(p.owner === 'terror' || (p.owner==='player' && p.risk>80)) {
-                ctx.shadowBlur = 10; ctx.shadowColor = 'red';
-                radius += Math.sin(Date.now()/200)*2; // Pulse
-            }
-
-            ctx.beginPath(); ctx.arc(p.x, p.y, radius, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI*2); ctx.fill();
             
-            // Text
-            ctx.fillStyle = '#ccc'; ctx.font = '10px Rajdhani'; ctx.textAlign = 'center'; ctx.shadowBlur=0;
-            ctx.fillText(p.name, p.x, p.y - radius - 5);
+            // War Pulse
+            if(p.risk > 80 && this.mode === 'mil') {
+                ctx.strokeStyle = 'red'; ctx.lineWidth = 2;
+                const pulse = r + Math.sin(Date.now()/200)*5;
+                ctx.beginPath(); ctx.arc(p.x, p.y, pulse, 0, Math.PI*2); ctx.stroke();
+            }
+
+            // Label
+            ctx.fillStyle = '#fff'; ctx.font = '11px Rajdhani'; ctx.textAlign = 'center'; ctx.shadowBlur=0;
+            ctx.fillText(p.n, p.x, p.y - r - 8);
         });
     },
 
@@ -968,29 +1073,30 @@ const map = {
     },
 
     click(e) {
-        const rect = this.canvas.getBoundingClientRect();
+        const rect = this.cvs.getBoundingClientRect();
         const mx = e.clientX - rect.left;
         const my = e.clientY - rect.top;
-
-        let found = null;
-        game.state.provinces.forEach(p => {
-            if(Math.hypot(mx-p.x, my-p.y) < 20) found = p;
+        
+        let hit = null;
+        game.state.provs.forEach((p, i) => {
+            if(Math.hypot(mx-p.x, my-p.y) < 20) hit = i;
         });
 
-        if(found) {
-            game.selectedProv = found.id;
-            document.getElementById('province-detail').style.display = 'block';
-            document.getElementById('pd-name').innerText = found.name;
-            document.getElementById('pd-owner').innerText = found.owner === 'player' ? 'BİZİM KONTROLDE' : 'YABANCI BÖLGE';
+        if(hit !== null) {
+            game.selProv = hit;
+            const p = game.state.provs[hit];
+            document.getElementById('province-tooltip').style.display = 'block';
+            document.getElementById('p-name').innerText = p.n;
             ui.update();
         } else {
-            game.selectedProv = null;
-            document.getElementById('province-detail').style.display = 'none';
+            game.selProv = null;
+            document.getElementById('province-tooltip').style.display = 'none';
         }
     }
 };
 
 window.onload = () => game.init();
+
 </script>
 </body>
 </html>
