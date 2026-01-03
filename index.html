@@ -86,6 +86,15 @@
             overflow: hidden; gap: 1px; background: #222;
         }
 
+        @media (max-width: 1200px) {
+            #viewport { grid-template-columns: 300px 1fr 300px; }
+        }
+        @media (max-width: 900px) {
+            #viewport { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; }
+            .panel:nth-child(1), .panel:nth-child(3) { display: none; } 
+            /* Mobile handling would require more complex tab system, kept simple for fixes */
+        }
+
         .panel { background: var(--bg-panel); display: flex; flex-direction: column; overflow: hidden; position: relative; }
         
         /* TABS */
@@ -196,7 +205,7 @@
 
     <div class="metric-group">
         <div class="metric" title="Hazine (Nakit Akışı)">
-            <span class="metric-val" id="val-money">$0 M</span>
+            <span class="metric-val" id="val-money">$0 B</span>
             <span class="metric-lbl"><i class="fa-solid fa-sack-dollar metric-icon"></i> HAZİNE</span>
         </div>
         <div class="metric" title="Politik Güç (PP)">
@@ -249,11 +258,30 @@
         <!-- POLITICS -->
         <div id="tab-l-pol" class="content-area active">
             <div class="card">
-                <div class="card-header">DEVLET YÖNETİMİ</div>
-                <div class="stat-row"><span>Lider:</span> <span style="color:var(--c-blue)">Başkan [OYUNCU]</span></div>
-                <div class="stat-row"><span>İdeoloji:</span> <span>Teknokratik Otoriter</span></div>
-                <div class="stat-row"><span>Parlamento Desteği:</span> <span id="pol-parl">55%</span></div>
+                <div class="card-header">LİDERLİK & İDEOLOJİ</div>
+                <div class="stat-row"><span>Lider:</span> <span style="color:var(--c-blue)" id="pol-leader">Başkan [OYUNCU]</span></div>
+                <div class="stat-row"><span>İdeoloji:</span> 
+                    <select id="ideology-select" onchange="game.pol.changeIdeology(this.value)" style="background:#111; color:var(--c-gold); padding:3px; border:1px solid #444; width:100%;">
+                        <option value="tech" selected>Teknokrasi</option>
+                        <option value="lib">Liberal Demokrasi</option>
+                        <option value="auth">Otoriter</option>
+                        <option value="comm">Komünizm</option>
+                        <option value="fasc">Faşizm</option>
+                        <option value="theo">Teokrasi</option>
+                    </select>
+                </div>
+                <div class="stat-row"><span>Parti Desteği:</span> <span id="pol-parl">55%</span></div>
                 <div class="progress-bar"><div class="progress-fill" id="bar-parl" style="width:55%; background:var(--c-green)"></div></div>
+                <div class="stat-row"><span>Liderlik Riski:</span> <span id="pol-risk" style="color:var(--c-red)">0%</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">İTİBAR & İNSAN HAKLARI</div>
+                <div class="stat-row"><span>Küresel İtibar:</span> <span id="pol-rep" style="color:var(--c-purple)">50/100</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-rep" style="width:50%; background:var(--c-purple)"></div></div>
+                <div class="stat-row"><span>İnsan Hakları:</span> <span id="pol-hr" style="color:var(--c-blue)">60/100</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-hr" style="width:60%; background:var(--c-blue)"></div></div>
+                <div class="stat-row"><span>Medya Kontrolü:</span> <span id="pol-media" style="color:var(--c-orange)">30/100</span></div>
             </div>
 
             <div class="card">
@@ -262,10 +290,13 @@
                     <span><i class="fa-solid fa-check-to-slot"></i> Erken Seçim</span> <span class="btn-tag">500 PP</span>
                 </button>
                 <button class="btn" onclick="game.pol.action('purge')">
-                    <span><i class="fa-solid fa-skull"></i> Parti İçi Temizlik</span> <span class="btn-tag">100 PP / -Hukuk</span>
+                    <span><i class="fa-solid fa-skull"></i> Parti İçi Temizlik</span> <span class="btn-tag">100 PP</span>
                 </button>
                 <button class="btn" onclick="game.pol.action('referendum')">
-                    <span><i class="fa-solid fa-scroll"></i> Anayasa Referandumu</span> <span class="btn-tag">250 PP</span>
+                    <span><i class="fa-solid fa-scroll"></i> Halk Oylaması</span> <span class="btn-tag">250 PP</span>
+                </button>
+                <button class="btn" onclick="game.pol.action('propaganda')">
+                    <span><i class="fa-solid fa-tv"></i> Medya Kontrolü Artır</span> <span class="btn-tag">150 PP</span>
                 </button>
                 <button class="btn btn-danger" onclick="game.pol.action('martial')">
                     <span><i class="fa-solid fa-person-military-pointing"></i> Sıkıyönetim İlanı</span> <span class="btn-tag">1000 PP</span>
@@ -273,11 +304,26 @@
             </div>
 
             <div class="card">
+                <div class="card-header">POLİTİK BLOKLAR</div>
+                <div class="stat-row"><span>Mevcut Blok:</span> <span id="pol-bloc" style="color:var(--c-blue)">NATO</span></div>
+                <div class="stat-row"><span>Blok Etkisi:</span> <span id="pol-bloc-inf">50%</span></div>
+                <button class="btn" onclick="game.pol.changeBloc('NATO')">NATO'ya Katıl</button>
+                <button class="btn" onclick="game.pol.changeBloc('EAST')">Doğu Bloku'na Geç</button>
+                <button class="btn" onclick="game.pol.changeBloc('INDEP')">Bağımsız Kal</button>
+            </div>
+
+            <div class="card">
                 <div class="card-header">ULUSLARARASI KURUMLAR</div>
-                <div class="stat-row"><span>BM Güvenlik Konseyi:</span> <span>Üye Değil</span></div>
-                <div class="stat-row"><span>NATO Durumu:</span> <span style="color:var(--c-blue)">Müttefik</span></div>
+                <div class="stat-row"><span>BM Güvenlik Konseyi:</span> <span id="un-status">Üye Değil</span></div>
+                <div class="stat-row"><span>NATO Durumu:</span> <span style="color:var(--c-blue)" id="nato-status">Müttefik</span></div>
                 <button class="btn" onclick="game.pol.unVote()">
                     <span>BM Oylamasına Katıl</span> <span class="btn-tag">Prestij</span>
+                </button>
+                <button class="btn" onclick="game.pol.unAction('sanction')">
+                    <span>BM Yaptırım Başlat</span> <span class="btn-tag">200 PP</span>
+                </button>
+                <button class="btn" onclick="game.pol.unAction('peace')">
+                    <span>Barış Gücü Talebi</span> <span class="btn-tag">İtibar</span>
                 </button>
             </div>
         </div>
@@ -388,7 +434,7 @@
             <div class="card">
                 <div class="card-header">GENELKURMAY</div>
                 <div class="stat-row"><span>İnsan Gücü:</span> <span id="mil-man">1.2M</span></div>
-                <div class="stat-row"><span>Lojistik Ağı:</span> <span id="mil-log" style="color:var(--c-orange)">%90</span></div>
+                <div class="stat-row"><span>Lojistik AĞI:</span> <span id="mil-log" style="color:var(--c-orange)">%90</span></div>
                 <div class="stat-row"><span>Savaş Yorgunluğu:</span> <span id="mil-fat">%0</span></div>
                 
                 <div class="stat-row" style="margin-top:10px;">
@@ -428,11 +474,20 @@
 
             <div id="dip-actions" style="display:none;" class="card">
                 <div class="card-header" id="dip-target">HEDEF ÜLKE</div>
-                <button class="btn" onclick="game.dip.act('improve')">İlişkileri Geliştir</button>
+                <div style="font-size:11px; color:#888; margin-bottom:8px;">
+                    <div class="stat-row"><span>Güven:</span> <span id="dip-trust">50</span></div>
+                    <div class="stat-row"><span>Etki:</span> <span id="dip-influence">50</span></div>
+                    <div class="stat-row"><span>Casus Ağı:</span> <span id="dip-spy">0</span></div>
+                </div>
+                <button class="btn" onclick="game.dip.act('improve')">İlişkileri Geliştir (-50 PP)</button>
                 <button class="btn" onclick="game.dip.act('trade')">Ticaret Anlaşması</button>
                 <button class="btn" onclick="game.dip.act('alliance')">İttifak Teklif Et</button>
+                <button class="btn" onclick="game.dip.act('influence')">Etki Artır (-100 PP)</button>
+                <button class="btn" onclick="game.dip.act('spy')">Casus Ağı Kur (-200 INT)</button>
+                <button class="btn" onclick="game.dip.act('secret')">Gizli Anlaşma (-300 PP)</button>
                 <button class="btn btn-danger" onclick="game.dip.act('embargo')">Ambargo Uygula</button>
                 <button class="btn btn-danger" onclick="game.dip.act('sanction')">Ekonomik Yaptırım</button>
+                <button class="btn btn-danger" onclick="game.dip.act('crisis')">Diplomatik Kriz Çıkar</button>
                 <button class="btn btn-danger" onclick="game.dip.act('war')">SAVAŞ İLAN ET</button>
             </div>
         </div>
@@ -453,8 +508,25 @@
                 <button class="btn" onclick="game.intel.op('sabotage')">
                     <span><i class="fa-solid fa-bomb"></i> Endüstriyel Sabotaj</span> <span class="btn-tag">150 INT</span>
                 </button>
+                <button class="btn" onclick="game.intel.op('influence')">
+                    <span><i class="fa-solid fa-masks-theater"></i> Medya Manipülasyonu</span> <span class="btn-tag">200 INT</span>
+                </button>
+                <button class="btn" onclick="game.intel.op('blackmail')">
+                    <span><i class="fa-solid fa-envelope-open-text"></i> Lider Şantaj</span> <span class="btn-tag">400 INT</span>
+                </button>
+                <button class="btn btn-danger" onclick="game.intel.op('blackop')">
+                    <span><i class="fa-solid fa-user-secret"></i> Kara Operasyon</span> <span class="btn-tag">800 INT</span>
+                </button>
             </div>
-            <div id="spy-log" style="font-family:var(--font-mono); font-size:10px; height:250px; overflow-y:auto; color:var(--c-grey); border-top:1px solid #333; padding-top:5px;">
+            
+            <div class="card">
+                <div class="card-header">AKTİF OPERASYONLAR</div>
+                <div id="active-ops" style="font-size:11px; color:var(--c-gold); min-height:60px;">
+                    Devam eden operasyon yok.
+                </div>
+            </div>
+            
+            <div id="spy-log" style="font-family:var(--font-mono); font-size:10px; height:150px; overflow-y:auto; color:var(--c-grey); border-top:1px solid #333; padding-top:5px; margin-top:10px;">
                 <div style="color:var(--c-green)">> KRİPTO AĞI AKTİF...</div>
             </div>
         </div>
@@ -479,7 +551,7 @@
             İçerik...
         </div>
         <div class="modal-foot" id="m-foot">
-            <button class="btn" style="width:auto">KAPAT</button>
+            <button class="btn" style="width:auto" onclick="ui.closeModal()">KAPAT</button>
         </div>
     </div>
 </div>
@@ -487,8 +559,7 @@
 <script>
 /**
  * AETERNA: OMEGA ENGINE v7.0 (GRAND ARCHITECT)
- * - Full Grand Strategy implementation in a single file.
- * - Advanced AI, Economy, Military, Diplomacy, Espionage.
+ * - Fixed & Optimized
  */
 
 /* --- CONFIG & DATA --- */
@@ -500,15 +571,29 @@ const CONFIG = {
 
 const DATA = {
     nations: [
-        { id:'us', n:'ABD', pwr:100, bloc:'NATO', trait:'Imperialist', rel:50 },
-        { id:'ru', n:'Rusya', pwr:90, bloc:'EAST', trait:'Aggressive', rel:30 },
-        { id:'cn', n:'Çin', pwr:95, bloc:'EAST', trait:'Economic', rel:40 },
-        { id:'eu', n:'Avrupa B.', pwr:85, bloc:'NATO', trait:'Diplomatic', rel:70 },
-        { id:'gr', n:'Yunanistan', pwr:25, bloc:'NATO', trait:'Hostile', rel:10 },
-        { id:'ir', n:'İran', pwr:40, bloc:'EAST', trait:'Theocratic', rel:45 },
-        { id:'il', n:'İsrail', pwr:50, bloc:'NATO', trait:'Militarist', rel:55 },
-        { id:'sy', n:'Suriye', pwr:10, bloc:'None', trait:'Chaos', rel:20 },
-        { id:'uk', n:'İngiltere', pwr:70, bloc:'NATO', trait:'Diplomatic', rel:65 }
+        { id:'us', n:'ABD', pwr:100, bloc:'NATO', trait:'Imperialist', rel:50, ideology:'Liberal', leader:'Demokrat Başkan', stability:85, reputation:75 },
+        { id:'ru', n:'Rusya', pwr:90, bloc:'EAST', trait:'Aggressive', rel:30, ideology:'Otoriter', leader:'Putin', stability:70, reputation:40 },
+        { id:'cn', n:'Çin', pwr:95, bloc:'EAST', trait:'Economic', rel:40, ideology:'Komünist', leader:'Xi Jinping', stability:90, reputation:55 },
+        { id:'eu', n:'Avrupa B.', pwr:85, bloc:'NATO', trait:'Diplomatic', rel:70, ideology:'Sosyal Demokrat', leader:'AB Komisyonu', stability:75, reputation:80 },
+        { id:'gr', n:'Yunanistan', pwr:25, bloc:'NATO', trait:'Hostile', rel:10, ideology:'Milliyetçi', leader:'Yunan Başbakan', stability:60, reputation:50 },
+        { id:'ir', n:'İran', pwr:40, bloc:'EAST', trait:'Theocratic', rel:45, ideology:'Teokrasi', leader:'Ayetullah', stability:65, reputation:35 },
+        { id:'il', n:'İsrail', pwr:50, bloc:'NATO', trait:'Militarist', rel:55, ideology:'Milliyetçi', leader:'Netanyahu', stability:70, reputation:45 },
+        { id:'sy', n:'Suriye', pwr:10, bloc:'None', trait:'Chaos', rel:20, ideology:'Diktatörlük', leader:'Esad', stability:20, reputation:15 },
+        { id:'uk', n:'İngiltere', pwr:70, bloc:'NATO', trait:'Diplomatic', rel:65, ideology:'Monarşik Parlamento', leader:'Başbakan', stability:80, reputation:70 },
+        { id:'az', n:'Azerbaycan', pwr:30, bloc:'None', trait:'Diplomatic', rel:90, ideology:'Otoriter', leader:'Aliyev', stability:75, reputation:60 }
+    ],
+    blocs: [
+        { id:'NATO', name:'NATO İttifakı', members:['us','eu','gr','il','uk'], power:400, influence:85 },
+        { id:'EAST', name:'Doğu Bloku', members:['ru','cn','ir'], power:225, influence:60 },
+        { id:'INDEP', name:'Bağımsızlar', members:['sy', 'az'], power:10, influence:20 }
+    ],
+    ideologies: [
+        { id:'lib', name:'Liberal Demokrasi', bonus:{ trade:+15, rep:+10 } },
+        { id:'auth', name:'Otoriter Rejim', bonus:{ stab:+20, pp:+10 } },
+        { id:'comm', name:'Komünizm', bonus:{ ind:+15, mil:+10 } },
+        { id:'fasc', name:'Faşizm', bonus:{ mil:+25, stab:+15 } },
+        { id:'theo', name:'Teokrasi', bonus:{ stab:+10, inf:-5 } },
+        { id:'tech', name:'Teknokrasi', bonus:{ rp:+20, gdp:+10 } }
     ],
     techs: [
         { id:'t1', n:'Yapay Zeka Savunma', c:500, i:'fa-brain' },
@@ -543,9 +628,12 @@ const game = {
         date: new Date(2026, 0, 1),
         paused: false,
         res: { money: 1000, pp: 500, intel: 100, fuel: 1000, ammo: 1000, rp: 0, rare: 50 },
-        stats: { gdp: 950, debt: 320, stab: 60, defcon: 5, inf: 12, pres: 50 },
+        stats: { gdp: 950, debt: 320, stab: 60, defcon: 5, inf: 12, pres: 50, reputation: 50, humanRights: 60, mediaControl: 30 },
         mil: { man: 1200, log: 90, fat: 0, doc: 'def', units: { inf:50, tank:10, air:5, sea:4, drone:20, space:0 } },
-        rel: {}, // Diplomacy map
+        player: { ideology: 'tech', leader: 'Başkan OYUNCU', partySupport: 55, leadershipRisk: 0 },
+        rel: {},
+        diplo: { secretDeals: [], sanctions: [], crises: [], propaganda: 0 },
+        blocs: { current: 'NATO', influence: 50 },
         provs: [],
         events: []
     },
@@ -570,7 +658,19 @@ const game = {
 
         // Init Diplomacy
         DATA.nations.forEach(n => {
-            this.state.rel[n.id] = { val: n.rel, war: false, trd: false, aly: false, emb: false };
+            this.state.rel[n.id] = { 
+                val: n.rel, 
+                war: false, 
+                trd: false, 
+                aly: false, 
+                emb: false,
+                sanction: false,
+                influence: 50,
+                trustLevel: 50,
+                spyNetwork: 0,
+                secretPact: null,
+                lastInteraction: null
+            };
         });
 
         ui.init();
@@ -612,28 +712,126 @@ const game = {
     // POLITICS MODULE
     pol: {
         tick() {
-            game.state.res.pp += 0.5;
-            game.state.stats.pres = Math.min(100, game.state.stats.pres + 0.01);
+            const s = game.state;
+            s.res.pp += 0.5;
+            s.stats.pres = Math.min(100, s.stats.pres + 0.01);
+            
+            // İtibar ve İnsan Hakları Değişimi
+            if(s.stats.mediaControl > 60) s.stats.reputation -= 0.05;
+            if(s.stats.humanRights < 40) s.stats.reputation -= 0.1;
+            
+            // Liderlik Riski
+            s.player.leadershipRisk = Math.max(0, 100 - s.player.partySupport);
+            if(s.player.leadershipRisk > 70 && Math.random() < 0.01) {
+                ui.alert("LİDERLİK KRİZİ", "Parti içinde size karşı bir hareket başladı!");
+                s.player.partySupport -= 10;
+            }
         },
         action(type) {
             const s = game.state;
             if(type === 'election') {
-                if(s.res.pp >= 500) { s.res.pp-=500; s.stats.stab+=15; ui.alert("Seçim Sonuçları", "Halk güven tazeledi. İstikrar arttı."); }
+                if(s.res.pp >= 500) { 
+                    s.res.pp-=500; 
+                    const result = Math.random() * 100;
+                    if(result > 50) {
+                        s.player.partySupport += 15;
+                        s.stats.stab+=15; 
+                        ui.alert("Seçim Sonuçları", "Halk güven tazeledi. İstikrar arttı."); 
+                    } else {
+                        s.player.partySupport -= 10;
+                        ui.alert("Seçim Sonuçları", "Muhalefet güçlendi. Destekte düşüş var.");
+                    }
+                }
             }
             if(type === 'purge') {
-                if(s.res.pp >= 100) { s.res.pp-=100; s.stats.stab+=5; ui.log("Parti içi temizlik yapıldı.", 'orange'); }
+                if(s.res.pp >= 100) { 
+                    s.res.pp-=100; 
+                    s.stats.stab+=5; 
+                    s.stats.humanRights-=5;
+                    ui.log("Parti içi temizlik yapıldı.", 'orange'); 
+                }
+            }
+            if(type === 'referendum') {
+                if(s.res.pp >= 250) {
+                    s.res.pp -= 250;
+                    const approval = Math.random() < (s.player.partySupport/100);
+                    if(approval) {
+                        s.stats.stab += 10;
+                        s.player.partySupport += 5;
+                        ui.alert("REFERANDUM", "Halk değişiklikleri onayladı!");
+                    } else {
+                        s.stats.stab -= 5;
+                        ui.alert("REFERANDUM", "Halk referandumu reddetti.");
+                    }
+                }
+            }
+            if(type === 'propaganda') {
+                if(s.res.pp >= 150) {
+                    s.res.pp -= 150;
+                    s.stats.mediaControl += 10;
+                    s.diplo.propaganda += 1;
+                    s.stats.reputation -= 2;
+                    ui.log("Medya kontrolü artırıldı. Muhalif sesler susturuldu.", 'orange');
+                }
             }
             if(type === 'martial') {
-                if(s.res.pp >= 1000) { s.res.pp-=1000; s.stats.stab=100; s.stats.gdp*=0.8; ui.alert("SIKIYÖNETİM", "Ordu yönetime el koydu. Ekonomi çöktü ama düzen sağlandı."); }
+                if(s.res.pp >= 1000) { 
+                    s.res.pp-=1000; 
+                    s.stats.stab=100; 
+                    s.stats.gdp*=0.8; 
+                    s.stats.humanRights = 20;
+                    s.stats.reputation -= 30;
+                    ui.alert("SIKIYÖNETIM", "Ordu yönetime el koydu. Ekonomi çöktü ama düzen sağlandı."); 
+                }
             }
+        },
+        changeIdeology(ideology) {
+            game.state.player.ideology = ideology;
+            const ideo = DATA.ideologies.find(i => i.id === ideology);
+            ui.log(`İdeoloji değişti: ${ideo.name}`, 'cyan');
+            ui.alert("İDEOLOJİ DEĞİŞİMİ", `${ideo.name} ideolojisine geçildi. Bonuslar aktif.`);
+            ui.update();
+        },
+        changeBloc(bloc) {
+            const oldBloc = game.state.blocs.current;
+            if(oldBloc === bloc) return;
+            
+            game.state.blocs.current = bloc;
+            game.state.stats.reputation -= 10;
+            
+            // İlişkilerde değişim
+            DATA.nations.forEach(n => {
+                const rel = game.state.rel[n.id];
+                if(n.bloc === bloc) {
+                    rel.val += 20;
+                } else if(n.bloc === oldBloc) {
+                    rel.val -= 30;
+                }
+            });
+            
+            ui.alert("BLOK DEĞİŞİMİ", `${bloc} bloğuna katıldınız. Eski müttefikler rahatsız!`);
+            ui.refreshDip();
         },
         unVote() {
             if(Math.random() > 0.5) {
                 game.state.stats.pres += 10;
+                game.state.stats.reputation += 5;
                 ui.alert("BM Oylaması", "Tasarı lehimize sonuçlandı. Prestij kazandık.");
             } else {
                 game.state.stats.pres -= 5;
                 ui.alert("BM Oylaması", "Veto yedik. Prestij kaybı.");
+            }
+        },
+        unAction(type) {
+            if(type === 'sanction') {
+                if(game.state.res.pp >= 200) {
+                    game.state.res.pp -= 200;
+                    ui.alert("BM YAPTIRIM", "Uluslararası yaptırım başlatıldı. Hedef ülke ekonomik baskı altında.");
+                }
+            }
+            if(type === 'peace') {
+                game.state.stats.reputation += 10;
+                ui.alert("BARIŞ GÜCÜ", "BM barış gücü talebi kabul edildi. İtibar arttı.");
             }
         }
     },
@@ -673,6 +871,15 @@ const game = {
                 game.state.stats.gdp += 10;
                 ui.log("Sanayi yatırımı tamamlandı.");
             }
+        },
+        energy(type) {
+             if(type === 'nuc' && game.state.res.money >= 5) {
+                game.state.res.money -= 5;
+                game.state.stats.gdp += 50;
+                ui.log("Nükleer Santral inşa edildi. Enerji bağımsızlığı arttı.", 'lime');
+             } else {
+                 ui.log("Yetersiz kaynak!", 'red');
+             }
         }
     },
 
@@ -729,7 +936,7 @@ const game = {
             game.state.provs.forEach(p => {
                 if(p.o === 'pl' && p.risk > 80) {
                     if(Math.random() < 0.1) {
-                        game.state.mil.units.inf -= 1;
+                        game.state.mil.units.inf = Math.max(0, game.state.mil.units.inf - 1);
                         game.state.stats.stab -= 1;
                         ui.log(`ÇATIŞMA: ${p.n} bölgesinde terör saldırısı! Kayıp verdik.`, 'red');
                     }
@@ -747,16 +954,91 @@ const game = {
             const pp = game.state.res.pp;
 
             if(type === 'improve') {
-                if(pp >= 50) { game.state.res.pp-=50; d.val+=10; ui.log("Diplomatik nota gönderildi."); }
+                if(pp >= 50) { 
+                    game.state.res.pp-=50; 
+                    d.val+=10; 
+                    d.trustLevel += 5;
+                    ui.log("Diplomatik nota gönderildi."); 
+                }
+            }
+            if(type === 'influence') {
+                if(pp >= 100) {
+                    game.state.res.pp -= 100;
+                    d.influence += 15;
+                    ui.log(`${game.selNat.n} üzerindeki etkimiz arttı.`, 'cyan');
+                }
+            }
+            if(type === 'spy') {
+                if(game.state.res.intel >= 200) {
+                    game.state.res.intel -= 200;
+                    d.spyNetwork += 1;
+                    ui.log(`${game.selNat.n}'de casus ağı kuruldu.`, 'lime');
+                }
+            }
+            if(type === 'secret') {
+                if(pp >= 300 && d.trustLevel > 60) {
+                    game.state.res.pp -= 300;
+                    d.secretPact = { type: 'mutual_defense', date: new Date(game.state.date) };
+                    game.state.diplo.secretDeals.push({ nation: nid, type: 'defense', active: true });
+                    ui.alert("GİZLİ ANLAŞMA", `${game.selNat.n} ile gizli savunma paktı imzalandı.`);
+                } else if(d.trustLevel <= 60) {
+                    ui.log("Güven seviyesi yetersiz!", 'red');
+                }
             }
             if(type === 'alliance') {
-                if(d.val > 80) { d.aly = true; ui.alert("İTTİFAK", `${game.selNat.n} ile müttefik oldunuz!`); }
+                if(d.val > 80) { 
+                    d.aly = true; 
+                    ui.alert("İTTİFAK", `${game.selNat.n} ile müttefik oldunuz!`); 
+                }
                 else ui.log("İttifak teklifi reddedildi.", 'red');
+            }
+            if(type === 'trade') {
+                if(d.val > 40) {
+                    d.trd = true;
+                    game.state.stats.gdp += 15;
+                    ui.alert("TİCARET", `${game.selNat.n} ile ticaret anlaşması imzalandı.`);
+                }
+            }
+            if(type === 'embargo') {
+                d.emb = true;
+                d.val -= 20;
+                game.state.stats.reputation -= 5;
+                ui.alert("AMBARGO", `${game.selNat.n}'ye ambargo uygulandı.`);
+            }
+            if(type === 'sanction') {
+                if(pp >= 200) {
+                    game.state.res.pp -= 200;
+                    d.sanction = true;
+                    d.val -= 30;
+                    game.state.diplo.sanctions.push({ nation: nid, severity: 'medium' });
+                    ui.alert("EKONOMİK YAPTIRIM", `${game.selNat.n}'ye yaptırım uygulandı. İlişkiler kötüleşti.`);
+                }
+            }
+            if(type === 'crisis') {
+                game.state.diplo.crises.push({ 
+                    nation: nid, 
+                    type: 'diplomatic', 
+                    severity: Math.random() < 0.5 ? 'medium' : 'high',
+                    resolved: false
+                });
+                d.val -= 40;
+                game.state.stats.defcon = Math.max(2, game.state.stats.defcon - 1);
+                ui.alert("DİPLOMATİK KRİZ", `${game.selNat.n} ile ilişkiler kopma noktasında!`);
             }
             if(type === 'war') {
                 ui.modal("SAVAŞ İLANI", `${game.selNat.n} ile savaşa giriyorsunuz. Bu geri dönülemez.`, [
                     { t:"SALDIR", c:'btn-danger', f:()=>{ 
-                        d.war=true; game.state.stats.defcon=1; 
+                        d.war=true; 
+                        game.state.stats.defcon=1; 
+                        game.state.stats.reputation -= 20;
+                        
+                        // Müttefiklerin tepkisi
+                        DATA.nations.forEach(n => {
+                            if(n.bloc === game.selNat.bloc && n.id !== nid) {
+                                game.state.rel[n.id].val -= 30;
+                            }
+                        });
+                        
                         ui.alert("SAVAŞ BAŞLADI", "Genelkurmay harekât planını devreye soktu."); 
                         ui.closeModal(); 
                     }},
@@ -769,27 +1051,130 @@ const game = {
 
     // INTEL MODULE
     intel: {
+        activeOps: [],
         op(type) {
-            const cost = { coup:500, assassin:1000, steal:250, sabotage:150 }[type];
+            const cost = { 
+                coup:500, 
+                assassin:1000, 
+                steal:250, 
+                sabotage:150,
+                influence:200,
+                blackmail:400,
+                blackop:800
+            }[type];
+            
             if(game.state.res.intel >= cost) {
                 game.state.res.intel -= cost;
                 
-                setTimeout(() => {
-                    const success = Math.random() > 0.5;
-                    if(success) {
-                        ui.alert("OPERASYON BAŞARILI", `${type.toUpperCase()} operasyonu hedefe ulaştı.`);
-                        if(type==='steal') { game.state.res.rp += 500; ui.log("Teknoloji çalındı: +500 RP", 'lime'); }
-                        if(type==='coup') ui.log("Hedef ülkede rejim değişti.", 'lime');
-                    } else {
-                        ui.alert("OPERASYON DEŞİFRE OLDU", "Ajanlarımız yakalandı. Uluslararası kriz!", 'red');
-                        game.state.stats.pres -= 20;
+                const opId = Date.now();
+                this.activeOps.push({ id: opId, type, status: 'active', progress: 0 });
+                this.updateActiveOps();
+                
+                const duration = type === 'assassin' ? 4000 : (type === 'blackop' ? 5000 : 2500);
+                
+                const progressInterval = setInterval(() => {
+                    const op = this.activeOps.find(o => o.id === opId);
+                    if(op) {
+                        op.progress += 25;
+                        this.updateActiveOps();
                     }
-                }, 2000);
+                }, duration / 4);
+                
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    const success = Math.random() > (type === 'assassin' || type === 'blackop' ? 0.6 : 0.4);
+                    
+                    if(success) {
+                        this.handleSuccess(type);
+                    } else {
+                        this.handleFailure(type);
+                    }
+                    
+                    this.activeOps = this.activeOps.filter(o => o.id !== opId);
+                    this.updateActiveOps();
+                }, duration);
                 
                 ui.log("Ajanlar sahaya iniyor...", 'cyan');
             } else {
-                ui.log("Yetersiz İstihbarat Ağı!", 'red');
+                ui.log("Yetersiz İstihbarat AĞI!", 'red');
             }
+        },
+        handleSuccess(type) {
+            const results = {
+                steal: () => {
+                    game.state.res.rp += 500;
+                    ui.log("Teknoloji çalındı: +500 RP", 'lime');
+                    ui.alert("OPERASYON BAŞARILI", "Düşman teknolojisi ele geçirildi!");
+                },
+                coup: () => {
+                    ui.log("Hedef ülkede rejim değişti.", 'lime');
+                    ui.alert("DARBE BAŞARILI", "Yeni hükümet bizden yana!");
+                    if(game.selNat) game.state.rel[game.selNat.id].val += 40;
+                },
+                assassin: () => {
+                    ui.alert("SUİKAST BAŞARILI", "Hedef lider etkisiz hale getirildi!");
+                    if(game.selNat) {
+                        game.state.rel[game.selNat.id].val += 20;
+                        game.state.stats.reputation -= 30;
+                    }
+                },
+                sabotage: () => {
+                    ui.alert("SABOTAJ BAŞARILI", "Düşman endüstrisi felç edildi!");
+                    game.state.stats.pres += 5;
+                },
+                influence: () => {
+                    ui.alert("MEDYA MANİPÜLASYONU", "Kamuoyu lehimize döndürüldü!");
+                    game.state.stats.reputation += 10;
+                },
+                blackmail: () => {
+                    ui.alert("ŞANTAJ BAŞARILI", "Hedef lider kontrolümüz altında!");
+                    if(game.selNat) game.state.rel[game.selNat.id].influence += 30;
+                },
+                blackop: () => {
+                    ui.alert("KARA OPERASYON", "Hedef tamamen etkisiz hale getirildi!");
+                    game.state.res.pp += 200;
+                    game.state.stats.reputation -= 40;
+                }
+            };
+            
+            if(results[type]) results[type]();
+        },
+        handleFailure(type) {
+            ui.alert("OPERASYON DEŞİFRE OLDU", "Ajanlarımız yakalandı. Uluslararası kriz!", 'red');
+            game.state.stats.pres -= 20;
+            game.state.stats.reputation -= 15;
+            game.state.stats.humanRights -= 10;
+            
+            // Hedef ülke ile ilişkiler bozulur
+            if(game.selNat) {
+                game.state.rel[game.selNat.id].val -= 40;
+                game.state.rel[game.selNat.id].trustLevel -= 30;
+            }
+        },
+        updateActiveOps() {
+            const div = document.getElementById('active-ops');
+            if(this.activeOps.length === 0) {
+                div.innerHTML = 'Devam eden operasyon yok.';
+                return;
+            }
+            
+            div.innerHTML = this.activeOps.map(op => {
+                const icons = {
+                    coup: 'fa-user-ninja',
+                    assassin: 'fa-skull-crossbones',
+                    steal: 'fa-microchip',
+                    sabotage: 'fa-bomb',
+                    influence: 'fa-masks-theater',
+                    blackmail: 'fa-envelope-open-text',
+                    blackop: 'fa-user-secret'
+                };
+                return `<div style="margin-bottom:5px; padding:5px; background:rgba(0,0,0,0.3); border-left:2px solid var(--c-blue);">
+                    <i class="fa-solid ${icons[op.type]}"></i> ${op.type.toUpperCase()} - ${op.progress}%
+                    <div class="progress-bar" style="height:3px; margin-top:3px;">
+                        <div class="progress-fill" style="width:${op.progress}%; background:var(--c-blue);"></div>
+                    </div>
+                </div>`;
+            }).join('');
         }
     },
 
@@ -821,6 +1206,12 @@ const game = {
         if(type==='invest' && game.state.res.money>=0.1) {
             game.state.res.money-=0.1; p.inf+=5; ui.log(`${p.n} altyapısı geliştirildi.`);
         }
+        if(type==='fort' && game.state.res.money>=0.2) {
+             game.state.res.money-=0.2; p.def+=10; ui.log(`${p.n} savunma hattı güçlendirildi.`);
+        }
+        if(type==='suppress' && game.state.res.pp>=50) {
+             game.state.res.pp-=50; p.risk=Math.max(0, p.risk-20); ui.log(`${p.n} bölgesinde isyan bastırıldı.`);
+        }
         if(type==='nuke') {
             ui.modal("NÜKLEER SALDIRI ONAYI", "Milyonlarca insan ölecek. Onaylıyor musunuz?", [
                 { t:"ATEŞLE", c:'btn-danger', f:()=>{
@@ -837,24 +1228,67 @@ const game = {
         tick() {
             // Nations act based on traits
             DATA.nations.forEach(n => {
-                if(game.state.rel[n.id].war && Math.random()<0.05) {
+                const d = game.state.rel[n.id];
+                
+                // Savaş durumunda saldırılar
+                if(d.war && Math.random()<0.05) {
                     ui.log(`${n.n} cephesinde ağır bombardıman!`, 'red');
+                    game.state.mil.units.inf -= Math.floor(Math.random() * 3);
+                }
+                
+                // İdeoloji ve özelliğe göre davranış
+                if(n.trait === 'Aggressive' && !d.war && d.val < 30 && Math.random() < 0.02) {
+                    ui.log(`${n.n} sınırda askeri tatbikat yapıyor!`, 'orange');
+                    game.state.stats.defcon = Math.max(2, game.state.stats.defcon - 1);
+                }
+                
+                if(n.trait === 'Economic' && d.trd && Math.random() < 0.03) {
+                    game.state.stats.gdp += 2;
+                    ui.log(`${n.n} ile ticaret hacmi arttı.`, 'lime');
+                }
+                
+                // Blok dinamikleri
+                const playerBloc = game.state.blocs.current;
+                if(n.bloc !== playerBloc && n.bloc !== 'None' && Math.random() < 0.01) {
+                    d.val -= 1;
+                }
+                
+                // Casus ağı tespit riski
+                if(d.spyNetwork > 3 && Math.random() < 0.05) {
+                    ui.log(`${n.n} istihbaratı casus ağımızı sızdırdı!`, 'red');
+                    d.spyNetwork = Math.max(0, d.spyNetwork - 1);
+                    d.trustLevel -= 20;
+                }
+            });
+            
+            // Kriz çözümü
+            game.state.diplo.crises.forEach((crisis, idx) => {
+                if(!crisis.resolved && Math.random() < 0.1) {
+                    crisis.resolved = true;
+                    ui.log(`${DATA.nations.find(n=>n.id===crisis.nation).n} krizi çözüldü.`, 'cyan');
+                    game.state.diplo.crises.splice(idx, 1);
                 }
             });
         },
         randomEvent() {
             const evs = [
-                "Küresel Petrol Krizi: Yakıt Fiyatları Arttı!",
-                "Komşu Ülkede İç Savaş Çıktı.",
-                "Siber Saldırı: Bankacılık Sistemi Çöktü.",
-                "Yeni Bir Pandemi Uyarısı!",
-                "Mülteci Dalgası Sınıra Dayandı."
+                { txt: "Küresel Petrol Krizi: Yakıt Fiyatları Arttı!", effect: () => { game.state.stats.gdp -= 5; game.state.res.fuel -= 500; } },
+                { txt: "Komşu Ülkede İç Savaş Çıktı.", effect: () => { game.state.stats.stab -= 3; } },
+                { txt: "Siber Saldırı: Bankacılık Sistemi Çöktü.", effect: () => { game.state.stats.gdp -= 10; game.state.stats.reputation -= 5; } },
+                { txt: "Yeni Bir Pandemi Uyarısı!", effect: () => { game.state.stats.stab -= 5; game.state.stats.gdp -= 8; } },
+                { txt: "Mülteci Dalgası Sınıra Dayandı.", effect: () => { game.state.stats.stab -= 4; } },
+                { txt: "Uluslararası Terör Saldırısı!", effect: () => { game.state.stats.stab -= 10; game.state.stats.reputation -= 3; } },
+                { txt: "BM'de İnsan Hakları İhlali İddiası!", effect: () => { game.state.stats.reputation -= 15; game.state.stats.humanRights -= 10; } },
+                { txt: "Büyük Güç Zirvesi Başlıyor.", effect: () => { game.state.stats.pres += 5; } },
+                { txt: "Ekonomik Mucize: GSYH Patladı!", effect: () => { game.state.stats.gdp += 30; } },
+                { txt: "Yeni Teknoloji Atılımı!", effect: () => { game.state.res.rp += 200; } }
             ];
-            const e = evs[Math.floor(Math.random()*evs.length)];
-            ui.ticker(e);
             
-            // Randomly affect stats
-            if(Math.random()<0.5) game.state.stats.gdp -= 5;
+            const e = evs[Math.floor(Math.random()*evs.length)];
+            ui.ticker(e.txt);
+            e.effect();
+            
+            ui.log(`KÜRESEL OLAY: ${e.txt}`, 'yellow');
         },
         nationAct() {
             // AI Logic placeholder
@@ -904,6 +1338,18 @@ const ui = {
         document.getElementById('u-drone').innerText = u.drone;
         document.getElementById('u-space').innerText = u.space;
 
+        // Political Stats
+        document.getElementById('pol-parl').innerText = Math.floor(s.player.partySupport) + '%';
+        document.getElementById('bar-parl').style.width = s.player.partySupport + '%';
+        document.getElementById('pol-risk').innerText = Math.floor(s.player.leadershipRisk) + '%';
+        document.getElementById('pol-rep').innerText = Math.floor(s.stats.reputation) + '/100';
+        document.getElementById('bar-rep').style.width = s.stats.reputation + '%';
+        document.getElementById('pol-hr').innerText = Math.floor(s.stats.humanRights) + '/100';
+        document.getElementById('bar-hr').style.width = s.stats.humanRights + '%';
+        document.getElementById('pol-media').innerText = Math.floor(s.stats.mediaControl) + '/100';
+        document.getElementById('pol-bloc').innerText = s.blocs.current;
+        document.getElementById('pol-bloc-inf').innerText = Math.floor(s.blocs.influence) + '%';
+
         // Province Detail
         if(game.selProv !== null) {
             const p = game.state.provs[game.selProv];
@@ -924,17 +1370,47 @@ const ui = {
         DATA.nations.forEach(n => {
             const d = game.state.rel[n.id];
             let col = '#888';
-            if(d.war) col = 'var(--c-red)';
-            else if(d.aly) col = 'var(--c-green)';
-            else if(d.val > 60) col = 'var(--c-blue)';
+            let status = '';
+            
+            if(d.war) {
+                col = 'var(--c-red)';
+                status = '⚔️ SAVAŞ';
+            } else if(d.aly) {
+                col = 'var(--c-green)';
+                status = '🤝 MÜTTEFİK';
+            } else if(d.sanction) {
+                col = 'var(--c-orange)';
+                status = '⚠️ YAPTIRIM';
+            } else if(d.val > 80) {
+                col = 'var(--c-blue)';
+                status = '😊 Dostane';
+            } else if(d.val < 30) {
+                col = 'var(--c-red)';
+                status = '😠 Düşman';
+            } else {
+                status = '😐 Nötr';
+            }
             
             const el = document.createElement('div');
             el.className = 'btn';
-            el.innerHTML = `<span>${n.n}</span> <span style="color:${col}; font-weight:bold">${d.val}</span>`;
+            el.innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:flex-start; width:100%;">
+                    <div style="display:flex; justify-content:space-between; width:100%;">
+                        <span>${n.n} ${status}</span>
+                        <span style="color:${col}; font-weight:bold">${Math.floor(d.val)}</span>
+                    </div>
+                    <div style="font-size:10px; color:#666; margin-top:2px;">
+                        ${n.leader} | ${n.ideology} | ${n.bloc}
+                    </div>
+                </div>
+            `;
             el.onclick = () => {
                 game.selNat = n;
                 document.getElementById('dip-actions').style.display = 'block';
-                document.getElementById('dip-target').innerText = n.n;
+                document.getElementById('dip-target').innerText = n.n + ' - ' + n.leader;
+                document.getElementById('dip-trust').innerText = Math.floor(d.trustLevel);
+                document.getElementById('dip-influence').innerText = Math.floor(d.influence);
+                document.getElementById('dip-spy').innerText = d.spyNetwork;
             };
             c.appendChild(el);
         });
